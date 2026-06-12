@@ -251,7 +251,6 @@ def fair_value_estimate(data):
 
 def sector_comparison(data, sector_row):
     pe = data.get("pe")
-    price = data.get("price")
 
     if sector_row is None or pe is None:
         return None
@@ -289,3 +288,93 @@ def abu_hamza_rating(score):
         return "⭐⭐ ضعيف"
     else:
         return "⭐ تجنب"
+
+
+def detailed_scores(data):
+    # الجودة
+    quality = 50
+
+    roe = data.get("roe")
+    pb = data.get("pb")
+
+    if roe:
+        if roe > 0.20:
+            quality += 25
+        elif roe > 0.15:
+            quality += 15
+        elif roe > 0.10:
+            quality += 10
+
+    if pb:
+        if pb < 3:
+            quality += 15
+        elif pb < 5:
+            quality += 10
+
+    quality = min(100, round(quality))
+
+    # النمو
+    growth = 50
+
+    rev = data.get("revenue_growth")
+    earn = data.get("earnings_growth")
+
+    if rev:
+        growth += min(25, rev * 100)
+
+    if earn:
+        growth += min(25, earn * 100)
+
+    growth = min(100, round(growth))
+
+    # الربحية
+    profitability = 50
+
+    margin = data.get("profit_margin")
+
+    if margin:
+        profitability += min(50, margin * 100)
+
+    profitability = min(100, round(profitability))
+
+    # الديون
+    debt_score = 100
+
+    debt = data.get("debt_to_equity")
+
+    if debt:
+        if debt > 200:
+            debt_score = 30
+        elif debt > 150:
+            debt_score = 50
+        elif debt > 100:
+            debt_score = 65
+        elif debt > 50:
+            debt_score = 80
+        else:
+            debt_score = 95
+
+    # التقييم
+    valuation = 50
+
+    pe = data.get("pe")
+
+    if pe:
+        if pe < 10:
+            valuation = 95
+        elif pe < 15:
+            valuation = 85
+        elif pe < 20:
+            valuation = 75
+        elif pe < 30:
+            valuation = 60
+        else:
+            valuation = 40
+
+    return {
+        "quality": quality,
+        "growth": growth,
+        "profitability": profitability,
+        "debt": debt_score,
+        "valuation": valuation
+    }
