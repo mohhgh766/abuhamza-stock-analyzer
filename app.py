@@ -7,7 +7,8 @@ from analysis import (
     investment_decision,
     horizon_scores,
     fair_value_estimate,
-    abu_hamza_rating
+    abu_hamza_rating,
+    detailed_scores
 )
 
 st.set_page_config(page_title="Abu Hamza Stock Analyzer", layout="wide")
@@ -68,7 +69,7 @@ def get_stock_data(user_input):
     stock = yf.Ticker(symbol)
     info = stock.info
 
-    data = {
+    return {
         "symbol": symbol,
         "name_ar": company["name_ar"],
         "name_en": company["name_en"],
@@ -93,8 +94,6 @@ def get_stock_data(user_input):
         "book_value": info.get("bookValue"),
     }
 
-    return data
-
 
 def display_analysis(user_input):
     data = get_stock_data(user_input)
@@ -103,6 +102,7 @@ def display_analysis(user_input):
     decision, note = investment_decision(score)
     periods = horizon_scores(data, score)
     fair_value = fair_value_estimate(data)
+    details = detailed_scores(data)
 
     st.subheader(f"{data['name_ar']} - {data['long_name']}")
     st.caption(f"الرمز المستخدم: {data['symbol']}")
@@ -119,10 +119,16 @@ def display_analysis(user_input):
         st.write(f"السعر الحالي: {round(data['price'], 2) if data['price'] else 'غير متوفر'}")
 
     with col2:
-        st.write(f"القيمة السوقية: {data['market_cap']:,.0f}" if data["market_cap"] else "القيمة السوقية: غير متوفر")
+        st.write(
+            f"القيمة السوقية: {data['market_cap']:,.0f}"
+            if data["market_cap"]
+            else "القيمة السوقية: غير متوفر"
+        )
         st.write(f"P/E: {round(data['pe'], 2) if data['pe'] else 'غير متوفر'}")
         st.write(f"P/B: {round(data['pb'], 2) if data['pb'] else 'غير متوفر'}")
-        st.write(f"ROE: {round(data['roe'] * 100, 2) if data['roe'] else 'غير متوفر'}%")
+        st.write(
+            f"ROE: {round(data['roe'] * 100, 2) if data['roe'] else 'غير متوفر'}%"
+        )
 
     st.divider()
     st.header("📈 القرار الاستثماري")
@@ -141,13 +147,27 @@ def display_analysis(user_input):
     st.info(abu_hamza_rating(score))
 
     st.divider()
+    st.header("📊 تحليل المحاور الخمسة")
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+        st.metric("الجودة", f"{details['quality']}/100")
+        st.metric("النمو", f"{details['growth']}/100")
+        st.metric("الربحية", f"{details['profitability']}/100")
+
+    with c2:
+        st.metric("الديون", f"{details['debt']}/100")
+        st.metric("التقييم", f"{details['valuation']}/100")
+
+    st.divider()
     st.header("⏳ تقييم المدد")
 
-    c1, c2, c3 = st.columns(3)
+    h1, h2, h3 = st.columns(3)
 
-    c1.metric("استثمار طويل", f"{periods['طويل المدى']}/100")
-    c2.metric("استثمار متوسط", f"{periods['متوسط المدى']}/100")
-    c3.metric("مضاربة", f"{periods['مضاربة']}/100")
+    h1.metric("استثمار طويل", f"{periods['طويل المدى']}/100")
+    h2.metric("استثمار متوسط", f"{periods['متوسط المدى']}/100")
+    h3.metric("مضاربة", f"{periods['مضاربة']}/100")
 
     st.divider()
     st.header("💰 القيمة العادلة التقديرية")
@@ -212,9 +232,17 @@ with tab2:
             score1, _, _ = score_stock(data1)
             score2, _, _ = score_stock(data2)
 
+            details1 = detailed_scores(data1)
+            details2 = detailed_scores(data2)
+
             comparison = pd.DataFrame({
                 "المعيار": [
-                    "التقييم",
+                    "التقييم النهائي",
+                    "الجودة",
+                    "النمو",
+                    "الربحية",
+                    "الديون",
+                    "التقييم السعري",
                     "السعر",
                     "P/E",
                     "P/B",
@@ -226,6 +254,11 @@ with tab2:
                 ],
                 data1["name_ar"]: [
                     score1,
+                    details1["quality"],
+                    details1["growth"],
+                    details1["profitability"],
+                    details1["debt"],
+                    details1["valuation"],
                     round(data1["price"], 2) if data1["price"] else None,
                     round(data1["pe"], 2) if data1["pe"] else None,
                     round(data1["pb"], 2) if data1["pb"] else None,
@@ -237,6 +270,11 @@ with tab2:
                 ],
                 data2["name_ar"]: [
                     score2,
+                    details2["quality"],
+                    details2["growth"],
+                    details2["profitability"],
+                    details2["debt"],
+                    details2["valuation"],
                     round(data2["price"], 2) if data2["price"] else None,
                     round(data2["pe"], 2) if data2["pe"] else None,
                     round(data2["pb"], 2) if data2["pb"] else None,
