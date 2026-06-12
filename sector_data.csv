@@ -1,14 +1,12 @@
-symbol,name,sector,sector_pe
-4031,الخدمات الأرضية,النقل,19
-4263,سالك,النقل,19
-4040,سابتكو,النقل,19
-1834,الموارد,الخدمات التجارية,18
-1833,المهارة,الخدمات التجارية,18
-1140,البلاد,البنوك,13
-1120,الراجحي,البنوك,13
-1150,الإنماء,البنوك,13
-1211,معادن,المواد الأساسية,17
-2222,أرامكو,الطاقة,15
-7010,STC,الاتصالات,16
-7020,عذيب,الاتصالات,16
-7203,علم,التقنية,24
+Sector,Average_PE,Average_ROE
+Technology,28,0.25
+Industrials,20,0.12
+Healthcare,24,0.15
+Financial Services,15,0.11
+Energy,13,0.14
+Consumer Defensive,18,0.10
+Consumer Cyclical,22,0.13
+Communication Services,21,0.16
+Utilities,16,0.09
+Real Estate,17,0.08
+Basic Materials,18,0.11
