@@ -1,211 +1,167 @@
 import streamlit as st
 import yfinance as yf
-import pandas as pd
 
-# =========================
-# إعداد الصفحة
-# =========================
-
-st.set_page_config(
-    page_title="Abu Hamza Stock Analyzer",
-    layout="wide"
-)
+st.set_page_config(page_title="Abu Hamza Stock Analyzer", layout="wide")
 
 st.title("📊 Abu Hamza Stock Analyzer")
 
-# =========================
-# تحميل قاعدة الشركات
-# =========================
+# -------------------
+# قاعدة بيانات القطاعات السعودية
+# -------------------
 
-@st.cache_data
-def load_companies():
-    return pd.read_csv("companies.csv")
+saudi_sectors = {
+    "4031": "النقل",
+    "4263": "النقل",
+    "4040": "النقل",
+    "1834": "الخدمات التجارية",
+    "1833": "الخدمات التجارية",
+    "1211": "البتروكيماويات",
+    "2222": "البتروكيماويات",
+    "2380": "البتروكيماويات",
+    "1140": "البنوك",
+    "1120": "البنوك",
+    "1150": "البنوك",
+    "7010": "الاتصالات",
+    "7020": "الاتصالات",
+    "7203": "التقنية"
+}
 
-companies = load_companies()
+st.header("تحليل شركة")
 
-# =========================
-# البحث عن الشركة
-# =========================
+symbol = st.text_input("أدخل رمز الشركة أو السهم")
 
-def find_company(user_input):
-    user_input = str(user_input).strip().lower()
+if symbol:
 
-    result = companies[
-        companies["input"].astype(str).str.lower() == user_input
-    ]
+    real_symbol = symbol
 
-    if not result.empty:
-        return result.iloc[0]
-
-    return None
-
-# =========================
-# الإدخال
-# =========================
-
-query = st.text_input("أدخل اسم الشركة أو الرمز")
-
-# =========================
-# التحليل
-# =========================
-
-if query:
-
-    company = find_company(query)
-
-    if company is not None:
-        symbol = company["symbol"]
-        name_ar = company["name_ar"]
-        name_en = company["name_en"]
-        sector_local = company["sector"]
-    else:
-        symbol = query.upper()
-        name_ar = query
-        name_en = query
-        sector_local = "غير محدد"
+    if symbol.isdigit():
+        real_symbol = symbol + ".SR"
 
     try:
-        stock = yf.Ticker(symbol)
+
+        stock = yf.Ticker(real_symbol)
         info = stock.info
 
-        st.subheader(f"{name_ar} - {name_en}")
-        st.caption(f"الرمز المستخدم: {symbol}")
+        name = info.get("longName", symbol)
 
-        st.divider()
+        st.subheader(name)
 
-        # =========================
-        # البيانات الأساسية
-        # =========================
+        sector_local = saudi_sectors.get(symbol, "غير معروف")
 
-        market_cap = info.get("marketCap")
-        pe = info.get("trailingPE")
-        roe = info.get("returnOnEquity")
+        pe = info.get("trailingPE", 0)
+        roe = info.get("returnOnEquity", 0)
 
+        if roe:
+            roe = roe * 100
+
+        market_cap = info.get("marketCap", 0)
+
+        st.markdown("---")
         st.header("معلومات أساسية")
 
         st.write(f"القطاع المحلي: {sector_local}")
-        st.write(f"القطاع العالمي: {info.get('sector', 'غير متوفر')}")
-        st.write(f"الصناعة: {info.get('industry', 'غير متوفر')}")
+        st.write(f"القطاع العالمي: {info.get('sector','غير متوفر')}")
+        st.write(f"الصناعة: {info.get('industry','غير متوفر')}")
+        st.write(f"القيمة السوقية: {market_cap:,.0f}")
+        st.write(f"مكرر الربحية: {pe:.2f}")
+        st.write(f"العائد على حقوق المساهمين ROE: {roe:.2f}%")
 
-        if market_cap:
-            st.write(f"القيمة السوقية: {market_cap:,.0f}")
-        else:
-            st.write("القيمة السوقية: غير متوفر")
+        score = 50
 
-        if pe:
-            st.write(f"مكرر الربحية: {round(pe, 2)}")
-        else:
-            st.write("مكرر الربحية: غير متوفر")
+        if pe and pe < 15:
+            score += 15
 
-        if roe:
-            st.write(f"العائد على حقوق المساهمين ROE: {round(roe * 100, 2)}%")
-        else:
-            st.write("العائد على حقوق المساهمين ROE: غير متوفر")
+        elif pe < 25:
+            score += 10
 
-        # =========================
-        # التقييم من 100
-        # =========================
+        if roe > 15:
+            score += 15
 
-        score = 0
+        elif roe > 10:
+            score += 10
 
-        # مكرر الربحية - 20 نقطة
-        if pe:
-            if pe < 10:
-                score += 20
-            elif pe < 15:
-                score += 16
-            elif pe < 20:
-                score += 12
-            elif pe < 30:
-                score += 8
-            else:
-                score += 4
+        score = min(score, 100)
 
-        # ROE - 20 نقطة
-        if roe:
-            roe_percent = roe * 100
-
-            if roe_percent >= 20:
-                score += 20
-            elif roe_percent >= 15:
-                score += 16
-            elif roe_percent >= 10:
-                score += 12
-            elif roe_percent >= 5:
-                score += 8
-            else:
-                score += 4
-
-        # القيمة السوقية - 20 نقطة
-        if market_cap:
-            if market_cap > 50_000_000_000:
-                score += 20
-            elif market_cap > 10_000_000_000:
-                score += 16
-            elif market_cap > 5_000_000_000:
-                score += 12
-            else:
-                score += 8
-
-        # نقاط مؤقتة إلى أن نضيف البيانات المالية الحقيقية
-        score += 20  # الربحية
-        score += 20  # جودة القطاع
-
-        # =========================
-        # عرض التقييم
-        # =========================
-
-        st.divider()
-
-        st.header("التقييم الأولي")
-
-        st.metric(
-            label="التقييم",
-            value=f"{score}/100"
-        )
-
-        # =========================
-        # القرار الاستثماري
-        # =========================
-
-        st.divider()
-
+        st.markdown("---")
         st.header("القرار الاستثماري")
 
-        if score >= 85:
-            st.success("🟢 ممتاز للاستثمار طويل المدى")
-            st.write("مناسبة للاستثمار 3-10 سنوات")
+        st.metric("التقييم", f"{score}/100")
+
+        if score >= 80:
+            st.success("ممتازة للاستثمار")
 
         elif score >= 70:
-            st.success("🟢 جيدة للاستثمار")
-            st.write("مناسبة للاستثمار 1-5 سنوات")
+            st.success("جيدة للاستثمار")
 
-        elif score >= 55:
-            st.warning("🟡 مناسبة للاستثمار الانتقائي")
-            st.write("تحتاج متابعة النتائج المالية")
-
-        elif score >= 40:
-            st.warning("🟠 مناسبة للمضاربة أكثر من الاستثمار")
+        elif score >= 60:
+            st.warning("متوسطة")
 
         else:
-            st.error("🔴 لا تبدو جذابة حالياً")
+            st.error("ضعيفة")
 
-        # =========================
-        # ملخص سريع
-        # =========================
-
-        st.divider()
-
-        st.header("ملخص سريع")
-
-        pe_text = round(pe, 2) if pe else "غير متوفر"
-        roe_text = round(roe * 100, 2) if roe else "غير متوفر"
-
-        st.write(f"• مكرر الربحية: {pe_text}")
-        st.write(f"• العائد على حقوق المساهمين: {roe_text}%")
-        st.write(f"• القطاع: {sector_local}")
-        st.write(f"• التقييم الحالي: {score}/100")
-
-    except Exception as e:
+    except:
         st.error("تعذر جلب البيانات")
-        st.write(str(e))
+
+
+# ==========================================
+# مقارنة شركتين
+# ==========================================
+
+st.markdown("---")
+st.header("⚔️ مقارنة شركتين")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    stock1 = st.text_input("الشركة الأولى")
+
+with col2:
+    stock2 = st.text_input("الشركة الثانية")
+
+if stock1 and stock2:
+
+    if stock1.isdigit():
+        stock1 += ".SR"
+
+    if stock2.isdigit():
+        stock2 += ".SR"
+
+    try:
+
+        a = yf.Ticker(stock1).info
+        b = yf.Ticker(stock2).info
+
+        name1 = a.get("longName", stock1)
+        name2 = b.get("longName", stock2)
+
+        pe1 = a.get("trailingPE", 0)
+        pe2 = b.get("trailingPE", 0)
+
+        roe1 = a.get("returnOnEquity", 0) * 100
+        roe2 = b.get("returnOnEquity", 0) * 100
+
+        st.subheader("نتائج المقارنة")
+
+        st.write(f"🏢 {name1}")
+        st.write(f"PE : {pe1:.2f}")
+        st.write(f"ROE : {roe1:.2f}%")
+
+        st.write("")
+
+        st.write(f"🏢 {name2}")
+        st.write(f"PE : {pe2:.2f}")
+        st.write(f"ROE : {roe2:.2f}%")
+
+        st.markdown("---")
+
+        winner = ""
+
+        if roe1 > roe2:
+            winner = name1
+        else:
+            winner = name2
+
+        st.success(f"🏆 الأفضل حالياً: {winner}")
+
+    except:
+        st.error("خطأ في المقارنة")
