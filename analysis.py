@@ -378,3 +378,31 @@ def detailed_scores(data):
         "debt": debt_score,
         "valuation": valuation
     }
+def margin_of_safety(data):
+    fair_value = fair_value_estimate(data)
+
+    if fair_value is None:
+        return None
+
+    current_price = data.get("price")
+
+    if not current_price:
+        return None
+
+    fair_price = fair_value["عادلة"]
+
+    margin = ((fair_price - current_price) / fair_price) * 100
+
+    if margin >= 30:
+        rating = "🟢 هامش أمان ممتاز"
+    elif margin >= 15:
+        rating = "🟡 هامش أمان جيد"
+    elif margin >= 0:
+        rating = "⚪ قريب من القيمة العادلة"
+    else:
+        rating = "🔴 أعلى من القيمة العادلة"
+
+    return {
+        "margin": round(margin, 2),
+        "rating": rating
+    }
