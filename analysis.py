@@ -1,12 +1,3 @@
-def safe_number(value):
-    try:
-        if value is None:
-            return None
-        return float(value)
-    except:
-        return None
-
-
 def score_stock(data):
     score = 0
     good = []
@@ -21,8 +12,10 @@ def score_stock(data):
     earnings_growth = data.get("earnings_growth")
     profit_margin = data.get("profit_margin")
     market_cap = data.get("market_cap")
+    fcf = data.get("free_cashflow")
+    ocf = data.get("operating_cashflow")
 
-    # P/E - 15
+    # P/E
     if pe:
         if pe < 10:
             score += 15
@@ -33,13 +26,16 @@ def score_stock(data):
         elif pe < 25:
             score += 8
             warn.append("مكرر الربحية متوسط")
-        else:
+        elif pe < 40:
             score += 4
             warn.append("مكرر الربحية مرتفع")
+        else:
+            score += 1
+            warn.append("مكرر الربحية مرتفع جدًا")
     else:
         warn.append("مكرر الربحية غير متوفر")
 
-    # ROE - 15
+    # ROE
     if roe:
         roe_percent = roe * 100
         if roe_percent >= 25:
@@ -52,12 +48,12 @@ def score_stock(data):
             score += 8
             warn.append("ROE مقبول")
         else:
-            score += 4
+            score += 3
             warn.append("ROE ضعيف")
     else:
         warn.append("ROE غير متوفر")
 
-    # Debt - 15
+    # Debt
     if debt is not None:
         if debt < 30:
             score += 15
@@ -72,13 +68,13 @@ def score_stock(data):
             score += 1
             warn.append("الديون مرتفعة")
     else:
-        score += 7
+        score += 6
         warn.append("بيانات الديون غير متوفرة")
 
-    # Growth - 15
+    # Growth
     growth_score = 0
 
-    if revenue_growth:
+    if revenue_growth is not None:
         if revenue_growth >= 0.20:
             growth_score += 8
             good.append("نمو الإيرادات قوي")
@@ -91,7 +87,7 @@ def score_stock(data):
         else:
             warn.append("الإيرادات متراجعة")
 
-    if earnings_growth:
+    if earnings_growth is not None:
         if earnings_growth >= 0.20:
             growth_score += 7
             good.append("نمو الأرباح قوي")
@@ -106,7 +102,7 @@ def score_stock(data):
 
     score += min(growth_score, 15)
 
-    # Margin - 10
+    # Profit Margin
     if profit_margin:
         margin = profit_margin * 100
         if margin >= 25:
@@ -122,10 +118,10 @@ def score_stock(data):
             score += 2
             warn.append("هامش الربح ضعيف")
     else:
-        score += 4
+        score += 3
         warn.append("هامش الربح غير متوفر")
 
-    # P/B - 10
+    # P/B
     if pb:
         if pb < 1:
             score += 10
@@ -140,10 +136,10 @@ def score_stock(data):
             score += 2
             warn.append("P/B مرتفع")
     else:
-        score += 4
+        score += 3
         warn.append("P/B غير متوفر")
 
-    # Dividend - 10
+    # Dividends
     if div_yield:
         dy = div_yield * 100
         if dy >= 5:
@@ -159,22 +155,30 @@ def score_stock(data):
         score += 2
         warn.append("التوزيعات غير واضحة أو غير متوفرة")
 
-    # Market Cap - 10
+    # Cash Flow
+    if fcf and fcf > 0:
+        score += 5
+        good.append("التدفق الحر موجب")
+    elif ocf and ocf > 0:
+        score += 3
+        good.append("التدفق التشغيلي موجب")
+    else:
+        warn.append("التدفقات النقدية غير واضحة")
+
+    # Market Cap
     if market_cap:
         if market_cap >= 50_000_000_000:
-            score += 10
+            score += 5
             good.append("شركة كبيرة")
         elif market_cap >= 10_000_000_000:
-            score += 8
+            score += 4
             good.append("شركة متوسطة إلى كبيرة")
         elif market_cap >= 3_000_000_000:
-            score += 5
+            score += 3
             warn.append("شركة متوسطة")
         else:
-            score += 3
+            score += 2
             warn.append("شركة صغيرة نسبيًا")
-    else:
-        score += 3
 
     return min(round(score), 100), good, warn
 
@@ -190,6 +194,19 @@ def investment_decision(score):
         return "🟠 مناسب للمضاربة أكثر من الاستثمار", "لا يناسب الاستثمار الطويل حاليًا"
     else:
         return "🔴 غير جذاب حاليًا", "الأفضل تجنبه أو دراسته بعمق"
+
+
+def abu_hamza_rating(score):
+    if score >= 85:
+        return "⭐⭐⭐⭐⭐ ممتاز"
+    elif score >= 70:
+        return "⭐⭐⭐⭐ جيد"
+    elif score >= 55:
+        return "⭐⭐⭐ متوسط"
+    elif score >= 40:
+        return "⭐⭐ ضعيف"
+    else:
+        return "⭐ تجنب"
 
 
 def horizon_scores(data, score):
@@ -235,12 +252,8 @@ def fair_value_estimate(data):
     eps = price / pe
 
     conservative = eps * 12
-    base = eps * 16
-    optimistic = eps * 20
-
-    if forward_pe and forward_pe < pe:
-        base = eps * 18
-        optimistic = eps * 22
+    base = eps * 18 if forward_pe and forward_pe < pe else eps * 16
+    optimistic = eps * 22 if forward_pe and forward_pe < pe else eps * 20
 
     return {
         "متحفظة": conservative,
@@ -249,54 +262,42 @@ def fair_value_estimate(data):
     }
 
 
-def sector_comparison(data, sector_row):
-    pe = data.get("pe")
+def margin_of_safety(data):
+    fair = fair_value_estimate(data)
+    price = data.get("price")
 
-    if sector_row is None or pe is None:
+    if not fair or not price:
         return None
 
-    sector_pe = sector_row.get("sector_pe")
+    fair_price = fair["عادلة"]
+    margin = ((fair_price - price) / price) * 100
 
-    if not sector_pe:
-        return None
-
-    diff = ((sector_pe - pe) / sector_pe) * 100
-
-    if diff > 10:
-        status = "🟢 أرخص من القطاع"
-    elif diff > -10:
-        status = "🟡 قريب من متوسط القطاع"
+    if margin >= 20:
+        status = "🟢 أقل من القيمة العادلة"
+    elif margin >= 0:
+        status = "🟡 قريب من القيمة العادلة"
+    elif margin >= -20:
+        status = "🟠 أعلى من القيمة العادلة"
     else:
-        status = "🔴 أغلى من القطاع"
+        status = "🔴 مبالغ في تقييمه"
 
     return {
-        "company_pe": pe,
-        "sector_pe": sector_pe,
-        "difference": diff,
-        "status": status,
+        "fair_price": fair_price,
+        "margin": round(margin, 2),
+        "status": status
     }
 
 
-def abu_hamza_rating(score):
-    if score >= 85:
-        return "⭐⭐⭐⭐⭐ ممتاز"
-    elif score >= 70:
-        return "⭐⭐⭐⭐ جيد"
-    elif score >= 55:
-        return "⭐⭐⭐ متوسط"
-    elif score >= 40:
-        return "⭐⭐ ضعيف"
-    else:
-        return "⭐ تجنب"
-
-
 def detailed_scores(data):
-    # الجودة
-    quality = 50
-
     roe = data.get("roe")
     pb = data.get("pb")
+    rev = data.get("revenue_growth")
+    earn = data.get("earnings_growth")
+    margin = data.get("profit_margin")
+    debt = data.get("debt_to_equity")
+    pe = data.get("pe")
 
+    quality = 50
     if roe:
         if roe > 0.20:
             quality += 25
@@ -304,44 +305,27 @@ def detailed_scores(data):
             quality += 15
         elif roe > 0.10:
             quality += 10
-
     if pb:
         if pb < 3:
             quality += 15
         elif pb < 5:
             quality += 10
-
     quality = min(100, round(quality))
 
-    # النمو
-    growth = 50
-
-    rev = data.get("revenue_growth")
-    earn = data.get("earnings_growth")
-
-    if rev:
-        growth += min(25, rev * 100)
-
-    if earn:
-        growth += min(25, earn * 100)
-
+    growth = 0
+    if rev is not None:
+        growth += max(0, min(50, rev * 100))
+    if earn is not None:
+        growth += max(0, min(50, earn * 100))
     growth = min(100, round(growth))
 
-    # الربحية
-    profitability = 50
-
-    margin = data.get("profit_margin")
-
+    profitability = 0
     if margin:
-        profitability += min(50, margin * 100)
+        profitability = min(100, round(margin * 200))
+    elif roe:
+        profitability = min(100, round(roe * 200))
 
-    profitability = min(100, round(profitability))
-
-    # الديون
-    debt_score = 100
-
-    debt = data.get("debt_to_equity")
-
+    debt_score = 80
     if debt:
         if debt > 200:
             debt_score = 30
@@ -354,11 +338,7 @@ def detailed_scores(data):
         else:
             debt_score = 95
 
-    # التقييم
     valuation = 50
-
-    pe = data.get("pe")
-
     if pe:
         if pe < 10:
             valuation = 95
@@ -368,8 +348,10 @@ def detailed_scores(data):
             valuation = 75
         elif pe < 30:
             valuation = 60
-        else:
+        elif pe < 45:
             valuation = 40
+        else:
+            valuation = 25
 
     return {
         "quality": quality,
@@ -378,31 +360,21 @@ def detailed_scores(data):
         "debt": debt_score,
         "valuation": valuation
     }
-def margin_of_safety(data):
-    fair_value = fair_value_estimate(data)
 
-    if fair_value is None:
-        return None
 
-    current_price = data.get("price")
+def opportunity_type(data, score):
+    div = data.get("dividend_yield") or 0
+    growth = (data.get("revenue_growth") or 0) + (data.get("earnings_growth") or 0)
+    pe = data.get("pe") or 0
 
-    if not current_price:
-        return None
-
-    fair_price = fair_value["عادلة"]
-
-    margin = ((fair_price - current_price) / fair_price) * 100
-
-    if margin >= 30:
-        rating = "🟢 هامش أمان ممتاز"
-    elif margin >= 15:
-        rating = "🟡 هامش أمان جيد"
-    elif margin >= 0:
-        rating = "⚪ قريب من القيمة العادلة"
-    else:
-        rating = "🔴 أعلى من القيمة العادلة"
-
-    return {
-        "margin": round(margin, 2),
-        "rating": rating
-    }
+    if score >= 80 and growth > 0.20:
+        return "🚀 سهم نمو قوي"
+    if score >= 70 and div >= 0.03:
+        return "💰 سهم توزيعات جيد"
+    if pe and pe < 15 and score >= 65:
+        return "🏷️ سهم قيمة"
+    if score >= 70:
+        return "🟢 سهم استثماري جيد"
+    if score >= 55:
+        return "🟡 سهم للمراقبة"
+    return "🔴 غير جذاب حاليًا"
