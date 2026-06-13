@@ -22,7 +22,13 @@ def load_companies():
     return pd.read_csv("companies.csv")
 
 
+@st.cache_data
+def load_sector_data():
+    return pd.read_csv("sector_data.csv")
+
+
 companies = load_companies()
+sector_data = load_sector_data()
 
 
 def find_company(user_input):
@@ -89,10 +95,7 @@ def get_stock_data(user_input):
         or fast_info.get("regularMarketPrice")
     )
 
-    market_cap = (
-        info.get("marketCap")
-        or fast_info.get("marketCap")
-    )
+    market_cap = info.get("marketCap") or fast_info.get("marketCap")
 
     return {
         "symbol": symbol,
@@ -118,6 +121,65 @@ def get_stock_data(user_input):
         "operating_cashflow": info.get("operatingCashflow"),
         "book_value": info.get("bookValue"),
     }
+
+
+def get_sector_benchmark(sector_name):
+    if not sector_name:
+        return None
+
+    row = sector_data[sector_data["Sector"].astype(str) == str(sector_name)]
+
+    if row.empty:
+        return None
+
+    return row.iloc[0]
+
+
+def display_sector_comparison(data):
+    benchmark = get_sector_benchmark(data["sector_global"])
+
+    st.divider()
+    st.header("🏢 مقارنة الشركة بالقطاع")
+
+    if benchmark is None:
+        st.info("لا توجد بيانات قطاعية متاحة لهذا القطاع حالياً")
+        return
+
+    company_pe = data.get("pe")
+    company_roe = data.get("roe")
+
+    sector_pe = benchmark["Average_PE"]
+    sector_roe = benchmark["Average_ROE"]
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+        st.metric("P/E الشركة", round(company_pe, 2) if company_pe else "غير متوفر")
+        st.metric("P/E القطاع", sector_pe)
+
+    with c2:
+        st.metric("ROE الشركة", f"{round(company_roe * 100, 2)}%" if company_roe else "غير متوفر")
+        st.metric("ROE القطاع", f"{round(sector_roe * 100, 2)}%")
+
+    if company_pe and sector_pe:
+        pe_diff = ((sector_pe - company_pe) / sector_pe) * 100
+
+        if pe_diff > 10:
+            st.success(f"🟢 السهم أرخص من متوسط القطاع بحوالي {round(pe_diff, 2)}%")
+        elif pe_diff > -10:
+            st.warning(f"🟡 السهم قريب من متوسط تقييم القطاع: {round(pe_diff, 2)}%")
+        else:
+            st.error(f"🔴 السهم أغلى من متوسط القطاع بحوالي {abs(round(pe_diff, 2))}%")
+
+    if company_roe and sector_roe:
+        roe_diff = ((company_roe - sector_roe) / sector_roe) * 100
+
+        if roe_diff > 20:
+            st.success(f"🟢 ROE الشركة أعلى من القطاع بحوالي {round(roe_diff, 2)}%")
+        elif roe_diff > -20:
+            st.warning(f"🟡 ROE الشركة قريب من القطاع: {round(roe_diff, 2)}%")
+        else:
+            st.error(f"🔴 ROE الشركة أقل من القطاع بحوالي {abs(round(roe_diff, 2))}%")
 
 
 def display_analysis(user_input):
@@ -181,6 +243,8 @@ def display_analysis(user_input):
         st.metric("الديون", f"{details['debt']}/100")
         st.metric("التقييم", f"{details['valuation']}/100")
 
+    display_sector_comparison(data)
+
     st.divider()
     st.header("⏳ تقييم المدد")
 
@@ -218,355 +282,11 @@ def display_analysis(user_input):
         st.write("لا توجد تنبيهات واضحة من البيانات المتاحة")
 
 
-tab1, tab2 = st.tabs(["تحليل شركة", "مقارنة شركتين"])
-
-
-with tab1:
-    query = st.text_input("أدخل اسم الشركة أو الرمز")
-
-    if query:
-        try:
-            display_analysis(query)
-        except Exception as e:
-            st.error("تعذر جلب البيانات")
-            st.write(str(e))
-
-
-with tab2:
-    st.header("⚔️ مقارنة شركتين")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        stock1 = st.text_input("الشركة الأولى")
-
-    with col2:
-        stock2 = st.text_input("الشركة الثانية")
-
-    if stock1 and stock2:
-        try:
-            data1 = get_stock_data(stock1)
-            data2 = get_stock_data(stock2)
-
-            score1, _, _ = score_stock(data1)
-            score2, _, _ = score_stock(data2)
-
-            details1 = detailed_scores(data1)
-            details2 = detailed_scores(data2)
-
-            comparison = pd.DataFrame({
-                "المعيار": [
-                    "التقييم النهائي",
-                    "الجودة",
-                    "النمو",
-                    "الربحية",
-                    "الديون",
-                    "التقييم السعري",
-                    "السعر",
-                    "P/E",
-                    "P/B",
-                    "ROE %",
-                    "Debt/Equity",
-                    "Dividend Yield %",
-                    "Revenue Growth %",
-                    "Earnings Growth %",
-                ],
-                data1["name_ar"]: [
-                    score1,
-                    details1["quality"],
-                    details1["growth"],
-                    details1["profitability"],
-                    details1["debt"],
-                    details1["valuation"],
-                    round(data1["price"], 2) if data1["price"] else None,
-                    round(data1["pe"], 2) if data1["pe"] else None,
-                    round(data1["pb"], 2) if data1["pb"] else None,
-                    round(data1["roe"] * 100, 2) if data1["roe"] else None,
-                    round(data1["debt_to_equity"], 2) if data1["debt_to_equity"] else None,
-                    round(data1["dividend_yield"] * 100, 2) if data1["dividend_yield"] else None,
-                    round(data1["revenue_growth"] * 100, 2) if data1["revenue_growth"] else None,
-                    round(data1["earnings_growth"] * 100, 2) if data1["earnings_growth"] else None,
-                ],
-                data2["name_ar"]: [
-                    score2,
-                    details2["quality"],
-                    details2["growth"],
-                    details2["profitability"],
-                    details2["debt"],
-                    details2["valuation"],
-                    round(data2["price"], 2) if data2["price"] else None,
-                    round(data2["pe"], 2) if data2["pe"] else None,
-                    round(data2["pb"], 2) if data2["pb"] else None,
-                    round(data2["roe"] * 100, 2) if data2["roe"] else None,
-                    round(data2["debt_to_equity"], 2) if data2["debt_to_equity"] else None,
-                    round(data2["dividend_yield"] * 100, 2) if data2["dividend_yield"] else None,
-                    round(data2["revenue_growth"] * 100, 2) if data2["revenue_growth"] else None,
-                    round(data2["earnings_growth"] * 100, 2) if data2["earnings_growth"] else None,
-                ],
-            })
-
-            st.dataframe(comparison, use_container_width=True)
-
-            st.divider()
-
-            if score1 > score2:
-                st.success(f"🏆 الأفضل حسب النموذج الحالي: {data1['name_ar']} - {score1}/100")
-            elif score2 > score1:
-                st.success(f"🏆 الأفضل حسب النموذج الحالي: {data2['name_ar']} - {score2}/100")
-            else:
-                st.info("الشركتان متقاربتان حسب النموذج الحالي")
-
-        except Exception as e:
-            st.error("تعذر إجراء المقارنة")
-            st.write(str(e))
-def get_stock_data(user_input):
-
-    company = normalize_symbol(user_input)
-
-    symbol = company["symbol"]
-
-    stock = yf.Ticker(symbol)
-
-    try:
-        info = stock.info
-    except:
-        info = {}
-
-    try:
-        fast_info = stock.fast_info
-    except:
-        fast_info = {}
-
-    return {
-        "symbol": symbol,
-        "name_ar": company["name_ar"],
-        "name_en": company["name_en"],
-        "sector_local": company["sector"],
-
-        "long_name": info.get("longName", company["name_en"]),
-
-        "sector_global": info.get("sector"),
-        "industry": info.get("industry"),
-
-        "price":
-            info.get("currentPrice")
-            or fast_info.get("lastPrice"),
-
-        "market_cap": info.get("marketCap"),
-
-        "pe": info.get("trailingPE"),
-        "forward_pe": info.get("forwardPE"),
-
-        "pb": info.get("priceToBook"),
-
-        "roe": info.get("returnOnEquity"),
-        "roa": info.get("returnOnAssets"),
-
-        "debt_to_equity": info.get("debtToEquity"),
-
-        "dividend_yield": info.get("dividendYield"),
-
-        "profit_margin": info.get("profitMargins"),
-
-        "revenue_growth": info.get("revenueGrowth"),
-        "earnings_growth": info.get("earningsGrowth"),
-
-        "free_cashflow": info.get("freeCashflow"),
-        "operating_cashflow": info.get("operatingCashflow"),
-
-        "book_value": info.get("bookValue"),
-    }
-
-
-def display_analysis(user_input):
-
-    data = get_stock_data(user_input)
-
-    score, good, warn = score_stock(data)
-
-    decision, note = investment_decision(score)
-
-    periods = horizon_scores(data, score)
-
-    fair_value = fair_value_estimate(data)
-
-    details = detailed_scores(data)
-
-    st.subheader(
-        f"{data['name_ar']} - {data['long_name']}"
-    )
-
-    st.caption(
-        f"الرمز المستخدم: {data['symbol']}"
-    )
-
-    st.divider()
-
-    st.header("معلومات أساسية")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-
-        st.write(
-            f"القطاع المحلي: {data['sector_local']}"
-        )
-
-        st.write(
-            f"القطاع العالمي: {data['sector_global'] or 'غير متوفر'}"
-        )
-
-        st.write(
-            f"الصناعة: {data['industry'] or 'غير متوفر'}"
-        )
-
-        st.write(
-            f"السعر الحالي: {round(data['price'],2) if data['price'] else 'غير متوفر'}"
-        )
-
-    with col2:
-
-        if data["market_cap"]:
-            st.write(
-                f"القيمة السوقية: {data['market_cap']:,.0f}"
-            )
-
-        st.write(
-            f"P/E: {round(data['pe'],2) if data['pe'] else 'غير متوفر'}"
-        )
-
-        st.write(
-            f"P/B: {round(data['pb'],2) if data['pb'] else 'غير متوفر'}"
-        )
-
-        st.write(
-            f"ROE: {round(data['roe']*100,2) if data['roe'] else 'غير متوفر'}%"
-        )
-
-    st.divider()
-
-    st.header("📈 القرار الاستثماري")
-
-    if score >= 70:
-        st.success(decision)
-    elif score >= 55:
-        st.warning(decision)
-    else:
-        st.error(decision)
-
-    st.write(note)
-
-    st.metric(
-        "التقييم النهائي",
-        f"{score}/100"
-    )
-
-    st.info(
-        abu_hamza_rating(score)
-    )
-
-    st.divider()
-
-    st.header("📊 تحليل المحاور الخمسة")
-
-    c1, c2 = st.columns(2)
-
-    with c1:
-        st.metric(
-            "الجودة",
-            f"{details['quality']}/100"
-        )
-
-        st.metric(
-            "النمو",
-            f"{details['growth']}/100"
-        )
-
-        st.metric(
-            "الربحية",
-            f"{details['profitability']}/100"
-        )
-
-    with c2:
-        st.metric(
-            "الديون",
-            f"{details['debt']}/100"
-        )
-
-        st.metric(
-            "التقييم",
-            f"{details['valuation']}/100"
-        )
-
-    st.divider()
-
-    st.header("⏳ تقييم المدد")
-
-    h1, h2, h3 = st.columns(3)
-
-    h1.metric(
-        "استثمار طويل",
-        f"{periods['طويل المدى']}/100"
-    )
-
-    h2.metric(
-        "استثمار متوسط",
-        f"{periods['متوسط المدى']}/100"
-    )
-
-    h3.metric(
-        "مضاربة",
-        f"{periods['مضاربة']}/100"
-    )
-
-    st.divider()
-
-    st.header("💰 القيمة العادلة")
-
-    if fair_value:
-
-        c1, c2, c3 = st.columns(3)
-
-        c1.metric(
-            "متحفظة",
-            round(fair_value["متحفظة"], 2)
-        )
-
-        c2.metric(
-            "عادلة",
-            round(fair_value["عادلة"], 2)
-        )
-
-        c3.metric(
-            "متفائلة",
-            round(fair_value["متفائلة"], 2)
-        )
-
-    st.divider()
-
-    st.header("✅ نقاط القوة")
-
-    for item in good:
-        st.write("•", item)
-
-    st.header("⚠️ نقاط الضعف")
-
-    for item in warn:
-        st.write("•", item)
-
-
-query = st.text_input(
-    "أدخل اسم الشركة أو الرمز"
-)
+query = st.text_input("أدخل اسم الشركة أو الرمز")
 
 if query:
-
     try:
-
         display_analysis(query)
-
     except Exception as e:
-
         st.error("تعذر جلب البيانات")
-
         st.write(str(e))
