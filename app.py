@@ -16,7 +16,7 @@ from analysis import (
 st.set_page_config(page_title="Abu Hamza Stock Analyzer", layout="wide")
 
 st.title("📊 Abu Hamza Stock Analyzer")
-st.caption("Abu Hamza Analyzer v8 - تحليل + مقارنة قطاع + القيمة العادلة + مكتشف الفرص")
+st.caption("Abu Hamza Analyzer v10 - تحليل + مركز الفرص + نمو + توزيعات + قيمة")
 
 
 @st.cache_data
@@ -298,36 +298,130 @@ def display_analysis(user_input):
         st.write("لا توجد تنبيهات واضحة من البيانات المتاحة")
 
 
-def opportunity_finder():
-    st.header("🔎 مكتشف الفرص")
+def build_opportunity_rows():
+    results = []
+    unique_companies = companies.drop_duplicates(subset=["symbol"])
 
-    st.caption("يفحص الشركات الموجودة في companies.csv ويرتب الأفضل حسب نموذج أبو حمزة.")
+    progress = st.progress(0)
 
-    if st.button("ابدأ البحث عن أفضل الفرص"):
-        results = []
+    total = len(unique_companies)
 
-        unique_companies = companies.drop_duplicates(subset=["symbol"])
+    for idx, (_, row) in enumerate(unique_companies.iterrows()):
+        try:
+            data = get_stock_data(row["input"])
+            score, _, _ = score_stock(data)
+            details = detailed_scores(data)
+            safety = margin_of_safety(data)
+            opp = opportunity_type(data, score)
 
-        progress = st.progress(0)
+            results.append({
+                "الشركة": data["name_ar"],
+                "الرمز": data["symbol"],
+                "القطاع": data["sector_local"],
+                "التقييم": score,
+                "نوع الفرصة": opp,
+                "النمو": details["growth"],
+                "الربحية": details["profitability"],
+                "الديون": details["debt"],
+                "التقييم السعري": details["valuation"],
+                "السعر": round(data["price"], 2) if data["price"] else None,
+                "P/E": round(data["pe"], 2) if data["pe"] else None,
+                "ROE %": round(data["roe"] * 100, 2) if data["roe"] else None,
+                "Dividend Yield %": round(data["dividend_yield"] * 100, 2) if data["dividend_yield"] else None,
+                "هامش الأمان %": safety["margin"] if safety else None,
+            })
 
-        for i, row in unique_companies.iterrows():
-            try:
-                data = get_stock_data(row["input"])
-                score, _, _ = score_stock(data)
-                safety = margin_of_safety(data)
-                opp = opportunity_type(data, score)
+        except Exception:
+            pass
 
-                results.append({
-                    "الشركة": data["name_ar"],
-                    "الرمز": data["symbol"],
-                    "التقييم": score,
-                    "نوع الفرصة": opp,
-                    "السعر": round(data["price"], 2) if data["price"] else None,
-                    "P/E": round(data["pe"], 2) if data["pe"] else None,
-                    "ROE %": round(data["roe"] * 100, 2) if data["roe"] else None,
-                    "هامش الأمان %": safety["margin"] if safety else None,
-                })
-            except Exception:
+        progress.progress(min((idx + 1) / total, 1.0))
+
+    if not results:
+        return pd.DataFrame()
+
+    return pd.DataFrame(results)
+
+
+def opportunity_center():
+    st.header("🏆 مركز الفرص الاستثمارية")
+    st.caption("يفحص الشركات الموجودة في companies.csv ويصنفها حسب النموذج الحالي.")
+
+    if st.button("ابدأ فحص مركز الفرص"):
+        df = build_opportunity_rows()
+
+        if df.empty:
+            st.warning("لم تظهر نتائج. قد يكون مصدر البيانات محظورًا مؤقتًا.")
+            return
+
+        st.divider()
+
+        st.subheader("🏆 أفضل 10 أسهم استثمارية")
+        st.dataframe(
+            df.sort_values(by="التقييم", ascending=False).head(10),
+            use_container_width=True
+        )
+
+        st.subheader("🚀 أفضل 10 أسهم نمو")
+        st.dataframe(
+            df.sort_values(by="النمو", ascending=False).head(10),
+            use_container_width=True
+        )
+
+        st.subheader("💰 أفضل 10 أسهم توزيعات")
+        div_df = df[df["Dividend Yield %"].notna()]
+        st.dataframe(
+            div_df.sort_values(by="Dividend Yield %", ascending=False).head(10),
+            use_container_width=True
+        )
+
+        st.subheader("🏷️ أفضل 10 أسهم قيمة")
+        value_df = df[df["P/E"].notna()]
+        value_df = value_df.sort_values(
+            by=["التقييم السعري", "التقييم"],
+            ascending=False
+        )
+        st.dataframe(value_df.head(10), use_container_width=True)
+
+        st.subheader("⭐ قائمة أبو حمزة الذهبية")
+        gold_df = df[
+            (df["التقييم"] >= 75) &
+            (df["ROE %"].fillna(0) >= 15) &
+            (df["الديون"] >= 70)
+        ]
+
+        if gold_df.empty:
+            st.info("لا توجد شركات تحقق شروط القائمة الذهبية حالياً.")
+        else:
+            st.dataframe(
+                gold_df.sort_values(by="التقييم", ascending=False),
+                use_container_width=True
+            )
+
+        st.subheader("📊 أفضل سهم في كل قطاع")
+        sector_best = (
+            df.sort_values(by="التقييم", ascending=False)
+            .groupby("القطاع")
+            .head(1)
+            .sort_values(by="التقييم", ascending=False)
+        )
+
+        st.dataframe(sector_best, use_container_width=True)
+
+
+tab1, tab2 = st.tabs(["تحليل شركة", "🏆 مركز الفرص"])
+
+with tab1:
+    query = st.text_input("أدخل اسم الشركة أو الرمز")
+
+    if query:
+        try:
+            display_analysis(query)
+        except Exception as e:
+            st.error("تعذر جلب البيانات")
+            st.write(str(e))
+
+with tab2:
+    opportunity_center()except Exception:
                 pass
 
             progress.progress(min((i + 1) / len(unique_companies), 1.0))
