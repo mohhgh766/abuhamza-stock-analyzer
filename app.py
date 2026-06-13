@@ -8,13 +8,15 @@ from analysis import (
     horizon_scores,
     fair_value_estimate,
     abu_hamza_rating,
-    detailed_scores
+    detailed_scores,
+    margin_of_safety,
+    opportunity_type
 )
 
 st.set_page_config(page_title="Abu Hamza Stock Analyzer", layout="wide")
 
 st.title("📊 Abu Hamza Stock Analyzer")
-st.caption("نسخة مجانية قوية - تحليل أولي للأسهم السعودية والأمريكية")
+st.caption("Abu Hamza Analyzer v8 - تحليل + مقارنة قطاع + القيمة العادلة + مكتشف الفرص")
 
 
 @st.cache_data
@@ -72,7 +74,6 @@ def normalize_symbol(user_input):
 def get_stock_data(user_input):
     company = normalize_symbol(user_input)
     symbol = company["symbol"]
-
     stock = yf.Ticker(symbol)
 
     try:
@@ -147,19 +148,16 @@ def display_sector_comparison(data):
 
     company_pe = data.get("pe")
     company_roe = data.get("roe")
-
     sector_pe = benchmark["Average_PE"]
     sector_roe = benchmark["Average_ROE"]
 
     c1, c2 = st.columns(2)
 
-    with c1:
-        st.metric("P/E الشركة", round(company_pe, 2) if company_pe else "غير متوفر")
-        st.metric("P/E القطاع", sector_pe)
+    c1.metric("P/E الشركة", round(company_pe, 2) if company_pe else "غير متوفر")
+    c1.metric("P/E القطاع", sector_pe)
 
-    with c2:
-        st.metric("ROE الشركة", f"{round(company_roe * 100, 2)}%" if company_roe else "غير متوفر")
-        st.metric("ROE القطاع", f"{round(sector_roe * 100, 2)}%")
+    c2.metric("ROE الشركة", f"{round(company_roe * 100, 2)}%" if company_roe else "غير متوفر")
+    c2.metric("ROE القطاع", f"{round(sector_roe * 100, 2)}%")
 
     if company_pe and sector_pe:
         pe_diff = ((sector_pe - company_pe) / sector_pe) * 100
@@ -214,6 +212,8 @@ def display_analysis(user_input):
     periods = horizon_scores(data, score)
     fair_value = fair_value_estimate(data)
     details = detailed_scores(data)
+    safety = margin_of_safety(data)
+    opp_type = opportunity_type(data, score)
 
     st.divider()
     st.header("📈 القرار الاستثماري")
@@ -228,6 +228,7 @@ def display_analysis(user_input):
     st.write(note)
     st.metric("التقييم النهائي", f"{score}/100")
     st.info(abu_hamza_rating(score))
+    st.write(f"### نوع الفرصة: {opp_type}")
 
     st.divider()
     st.header("📊 تحليل المحاور الخمسة")
@@ -254,7 +255,7 @@ def display_analysis(user_input):
     h3.metric("مضاربة", f"{periods['مضاربة']}/100")
 
     st.divider()
-    st.header("💰 القيمة العادلة التقديرية")
+    st.header("💰 القيمة العادلة وهامش الأمان")
 
     if fair_value:
         f1, f2, f3 = st.columns(3)
@@ -262,28 +263,20 @@ def display_analysis(user_input):
         f2.metric("عادلة", f"{fair_value['عادلة']:.2f}")
         f3.metric("متفائلة", f"{fair_value['متفائلة']:.2f}")
 
-        current_price = data.get("price")
-
-        if current_price:
-            diff = ((fair_value["عادلة"] - current_price) / current_price) * 100
-
-            st.divider()
+        if safety:
             st.subheader("📍 مقارنة السعر بالقيمة العادلة")
 
-            c1, c2 = st.columns(2)
+            s1, s2, s3 = st.columns(3)
+            s1.metric("السعر الحالي", f"{data['price']:.2f}")
+            s2.metric("القيمة العادلة", f"{safety['fair_price']:.2f}")
+            s3.metric("هامش الأمان", f"{safety['margin']}%")
 
-            c1.metric("السعر الحالي", f"{current_price:.2f}")
-            c2.metric("القيمة العادلة", f"{fair_value['عادلة']:.2f}")
-
-            if diff > 15:
-                st.success(f"🟢 السهم أقل من قيمته العادلة بحوالي {diff:.1f}%")
-            elif diff > 0:
-                st.info(f"🟡 السهم أقل من قيمته العادلة بحوالي {diff:.1f}%")
-            elif diff > -15:
-                st.warning(f"🟠 السهم أعلى من قيمته العادلة بحوالي {abs(diff):.1f}%")
+            if safety["margin"] > 15:
+                st.success(safety["status"])
+            elif safety["margin"] >= 0:
+                st.warning(safety["status"])
             else:
-                st.error(f"🔴 السهم مبالغ في تقييمه بحوالي {abs(diff):.1f}%")
-
+                st.error(safety["status"])
     else:
         st.info("لا يمكن حساب القيمة العادلة بسبب نقص البيانات")
 
@@ -305,11 +298,61 @@ def display_analysis(user_input):
         st.write("لا توجد تنبيهات واضحة من البيانات المتاحة")
 
 
-query = st.text_input("أدخل اسم الشركة أو الرمز")
+def opportunity_finder():
+    st.header("🔎 مكتشف الفرص")
 
-if query:
-    try:
-        display_analysis(query)
-    except Exception as e:
-        st.error("تعذر جلب البيانات")
-        st.write(str(e))
+    st.caption("يفحص الشركات الموجودة في companies.csv ويرتب الأفضل حسب نموذج أبو حمزة.")
+
+    if st.button("ابدأ البحث عن أفضل الفرص"):
+        results = []
+
+        unique_companies = companies.drop_duplicates(subset=["symbol"])
+
+        progress = st.progress(0)
+
+        for i, row in unique_companies.iterrows():
+            try:
+                data = get_stock_data(row["input"])
+                score, _, _ = score_stock(data)
+                safety = margin_of_safety(data)
+                opp = opportunity_type(data, score)
+
+                results.append({
+                    "الشركة": data["name_ar"],
+                    "الرمز": data["symbol"],
+                    "التقييم": score,
+                    "نوع الفرصة": opp,
+                    "السعر": round(data["price"], 2) if data["price"] else None,
+                    "P/E": round(data["pe"], 2) if data["pe"] else None,
+                    "ROE %": round(data["roe"] * 100, 2) if data["roe"] else None,
+                    "هامش الأمان %": safety["margin"] if safety else None,
+                })
+            except Exception:
+                pass
+
+            progress.progress(min((i + 1) / len(unique_companies), 1.0))
+
+        if results:
+            df = pd.DataFrame(results)
+            df = df.sort_values(by="التقييم", ascending=False)
+
+            st.subheader("🏆 أفضل الفرص حسب النموذج الحالي")
+            st.dataframe(df.head(10), use_container_width=True)
+        else:
+            st.warning("لم يتم العثور على نتائج. قد يكون المصدر محظورًا مؤقتًا.")
+
+
+tab1, tab2 = st.tabs(["تحليل شركة", "مكتشف الفرص"])
+
+with tab1:
+    query = st.text_input("أدخل اسم الشركة أو الرمز")
+
+    if query:
+        try:
+            display_analysis(query)
+        except Exception as e:
+            st.error("تعذر جلب البيانات")
+            st.write(str(e))
+
+with tab2:
+    opportunity_finder()
