@@ -421,32 +421,4 @@ with tab1:
             st.write(str(e))
 
 with tab2:
-    opportunity_center()except Exception:
-                pass
-
-            progress.progress(min((i + 1) / len(unique_companies), 1.0))
-
-        if results:
-            df = pd.DataFrame(results)
-            df = df.sort_values(by="التقييم", ascending=False)
-
-            st.subheader("🏆 أفضل الفرص حسب النموذج الحالي")
-            st.dataframe(df.head(10), use_container_width=True)
-        else:
-            st.warning("لم يتم العثور على نتائج. قد يكون المصدر محظورًا مؤقتًا.")
-
-
-tab1, tab2 = st.tabs(["تحليل شركة", "مكتشف الفرص"])
-
-with tab1:
-    query = st.text_input("أدخل اسم الشركة أو الرمز")
-
-    if query:
-        try:
-            display_analysis(query)
-        except Exception as e:
-            st.error("تعذر جلب البيانات")
-            st.write(str(e))
-
-with tab2:
-    opportunity_finder()
+    opportunity_center()
