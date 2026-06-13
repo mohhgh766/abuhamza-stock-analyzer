@@ -254,13 +254,36 @@ def display_analysis(user_input):
     h3.metric("مضاربة", f"{periods['مضاربة']}/100")
 
     st.divider()
-    st.header("💰 القيمة العادلة")
+    st.header("💰 القيمة العادلة التقديرية")
 
     if fair_value:
         f1, f2, f3 = st.columns(3)
-        f1.metric("متحفظة", round(fair_value["متحفظة"], 2))
-        f2.metric("عادلة", round(fair_value["عادلة"], 2))
-        f3.metric("متفائلة", round(fair_value["متفائلة"], 2))
+        f1.metric("متحفظة", f"{fair_value['متحفظة']:.2f}")
+        f2.metric("عادلة", f"{fair_value['عادلة']:.2f}")
+        f3.metric("متفائلة", f"{fair_value['متفائلة']:.2f}")
+
+        current_price = data.get("price")
+
+        if current_price:
+            diff = ((fair_value["عادلة"] - current_price) / current_price) * 100
+
+            st.divider()
+            st.subheader("📍 مقارنة السعر بالقيمة العادلة")
+
+            c1, c2 = st.columns(2)
+
+            c1.metric("السعر الحالي", f"{current_price:.2f}")
+            c2.metric("القيمة العادلة", f"{fair_value['عادلة']:.2f}")
+
+            if diff > 15:
+                st.success(f"🟢 السهم أقل من قيمته العادلة بحوالي {diff:.1f}%")
+            elif diff > 0:
+                st.info(f"🟡 السهم أقل من قيمته العادلة بحوالي {diff:.1f}%")
+            elif diff > -15:
+                st.warning(f"🟠 السهم أعلى من قيمته العادلة بحوالي {abs(diff):.1f}%")
+            else:
+                st.error(f"🔴 السهم مبالغ في تقييمه بحوالي {abs(diff):.1f}%")
+
     else:
         st.info("لا يمكن حساب القيمة العادلة بسبب نقص البيانات")
 
