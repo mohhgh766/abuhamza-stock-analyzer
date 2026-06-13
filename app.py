@@ -24,22 +24,32 @@ st.title("📊 Abu Hamza Stock Analyzer")
 st.caption("v11 - تحليل مالي + أخبار تلقائية + تأثير الأخبار على التقييم")
 st.warning("تنبيه: هذه أداة تحليل تعليمية وليست توصية شراء أو بيع. البيانات قد تتأخر أو تكون غير مكتملة.")
 
+if st.button("🔄 تحديث قاعدة الشركات"):
+    st.cache_data.clear()
+    st.rerun()
 
-@st.cache_data
+
+@st.cache_data(ttl=60)
 def load_companies():
-    df = pd.read_csv("companies.csv", dtype=str)
+    df = pd.read_csv("companies.csv", dtype=str, encoding="utf-8")
     df = df.fillna("")
+    df.columns = df.columns.str.strip()
+
     for col in df.columns:
         df[col] = df[col].astype(str).str.strip()
+
     return df
 
 
 @st.cache_data
 def load_sector_data():
-    df = pd.read_csv("sector_data.csv", dtype=str)
+    df = pd.read_csv("sector_data.csv", dtype=str, encoding="utf-8")
     df = df.fillna("")
+    df.columns = df.columns.str.strip()
+
     for col in df.columns:
         df[col] = df[col].astype(str).str.strip()
+
     return df
 
 
@@ -49,34 +59,18 @@ sector_data = load_sector_data()
 
 def find_company(user_input):
     search_text = str(user_input).strip().upper()
+    search_symbol = search_text if search_text.endswith(".SR") else search_text + ".SR"
 
-    result = companies[
-        companies["input"].astype(str).str.strip().str.upper() == search_text
-    ]
+    for col in ["input", "symbol", "name_ar", "name_en"]:
+        if col in companies.columns:
+            result = companies[
+                companies[col].astype(str).str.strip().str.upper().isin(
+                    [search_text, search_symbol]
+                )
+            ]
 
-    if not result.empty:
-        return result.iloc[0]
-
-    result = companies[
-        companies["symbol"].astype(str).str.strip().str.upper() == search_text
-    ]
-
-    if not result.empty:
-        return result.iloc[0]
-
-    result = companies[
-        companies["name_ar"].astype(str).str.strip().str.upper() == search_text
-    ]
-
-    if not result.empty:
-        return result.iloc[0]
-
-    result = companies[
-        companies["name_en"].astype(str).str.strip().str.upper() == search_text
-    ]
-
-    if not result.empty:
-        return result.iloc[0]
+            if not result.empty:
+                return result.iloc[0]
 
     return None
 
@@ -181,7 +175,9 @@ def get_sector_benchmark(sector_name):
     if not sector_name:
         return None
 
-    row = sector_data[sector_data["Sector"].astype(str).str.strip() == str(sector_name).strip()]
+    row = sector_data[
+        sector_data["Sector"].astype(str).str.strip() == str(sector_name).strip()
+    ]
 
     if row.empty:
         return None
