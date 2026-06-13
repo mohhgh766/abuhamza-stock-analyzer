@@ -13,10 +13,15 @@ from analysis import (
     opportunity_type
 )
 
+from news_engine import (
+    get_all_news,
+    news_score
+)
+
 st.set_page_config(page_title="Abu Hamza Stock Analyzer", layout="wide")
 
 st.title("📊 Abu Hamza Stock Analyzer")
-st.caption("Abu Hamza Analyzer v10 - تحليل + مركز الفرص + نمو + توزيعات + قيمة")
+st.caption("v11 - تحليل مالي + أخبار تلقائية + تأثير الأخبار على التقييم")
 
 
 @st.cache_data
@@ -124,6 +129,19 @@ def get_stock_data(user_input):
     }
 
 
+def adjusted_score(base_score, news_rating):
+    if news_rating >= 75:
+        return min(100, base_score + 5)
+    elif news_rating >= 60:
+        return min(100, base_score + 2)
+    elif news_rating >= 45:
+        return base_score
+    elif news_rating >= 30:
+        return max(0, base_score - 4)
+    else:
+        return max(0, base_score - 8)
+
+
 def get_sector_benchmark(sector_name):
     if not sector_name:
         return None
@@ -180,6 +198,29 @@ def display_sector_comparison(data):
             st.error(f"🔴 ROE الشركة أقل من القطاع بحوالي {abs(round(roe_diff, 2))}%")
 
 
+def display_news_section(news):
+    st.divider()
+    st.header("📰 آخر الأخبار")
+
+    if not news:
+        st.info("لا توجد أخبار متاحة حالياً")
+        return
+
+    for item in news:
+        sentiment = item.get("sentiment", "محايد")
+
+        if sentiment == "إيجابي":
+            emoji = "🟢"
+        elif sentiment == "سلبي":
+            emoji = "🔴"
+        else:
+            emoji = "🟡"
+
+        st.markdown(f"{emoji} **{item['title']}**")
+        if item.get("link"):
+            st.markdown(f"[فتح الخبر]({item['link']})")
+
+
 def display_analysis(user_input):
     data = get_stock_data(user_input)
 
@@ -207,27 +248,49 @@ def display_analysis(user_input):
         st.error("البيانات غير مكتملة من المصدر حالياً. انتظر قليلاً ثم أعد المحاولة.")
         return
 
-    score, good, warn = score_stock(data)
-    decision, note = investment_decision(score)
-    periods = horizon_scores(data, score)
+    base_score, good, warn = score_stock(data)
+
+    news = get_all_news(
+        data["symbol"],
+        data["name_ar"]
+    )
+
+    news_rating, news_status = news_score(news)
+
+    final_score = adjusted_score(base_score, news_rating)
+
+    decision, note = investment_decision(final_score)
+    periods = horizon_scores(data, final_score)
     fair_value = fair_value_estimate(data)
     details = detailed_scores(data)
     safety = margin_of_safety(data)
-    opp_type = opportunity_type(data, score)
+    opp_type = opportunity_type(data, final_score)
 
     st.divider()
     st.header("📈 القرار الاستثماري")
 
-    if score >= 70:
+    if final_score >= 70:
         st.success(decision)
-    elif score >= 55:
+    elif final_score >= 55:
         st.warning(decision)
     else:
         st.error(decision)
 
     st.write(note)
-    st.metric("التقييم النهائي", f"{score}/100")
-    st.info(abu_hamza_rating(score))
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("التقييم المالي", f"{base_score}/100")
+    c2.metric("درجة الأخبار", f"{news_rating}/100")
+    c3.metric("التقييم النهائي", f"{final_score}/100")
+
+    if news_rating >= 70:
+        st.success(news_status)
+    elif news_rating >= 45:
+        st.warning(news_status)
+    else:
+        st.error(news_status)
+
+    st.info(abu_hamza_rating(final_score))
     st.write(f"### نوع الفرصة: {opp_type}")
 
     st.divider()
@@ -280,6 +343,8 @@ def display_analysis(user_input):
     else:
         st.info("لا يمكن حساب القيمة العادلة بسبب نقص البيانات")
 
+    display_news_section(news)
+
     st.divider()
     st.header("✅ نقاط القوة")
 
@@ -303,22 +368,29 @@ def build_opportunity_rows():
     unique_companies = companies.drop_duplicates(subset=["symbol"])
 
     progress = st.progress(0)
-
     total = len(unique_companies)
 
     for idx, (_, row) in enumerate(unique_companies.iterrows()):
         try:
             data = get_stock_data(row["input"])
-            score, _, _ = score_stock(data)
+            base_score, _, _ = score_stock(data)
+
+            news = get_all_news(data["symbol"], data["name_ar"], limit=4)
+            news_rating, _ = news_score(news)
+
+            final_score = adjusted_score(base_score, news_rating)
+
             details = detailed_scores(data)
             safety = margin_of_safety(data)
-            opp = opportunity_type(data, score)
+            opp = opportunity_type(data, final_score)
 
             results.append({
                 "الشركة": data["name_ar"],
                 "الرمز": data["symbol"],
                 "القطاع": data["sector_local"],
-                "التقييم": score,
+                "التقييم المالي": base_score,
+                "درجة الأخبار": news_rating,
+                "التقييم النهائي": final_score,
                 "نوع الفرصة": opp,
                 "النمو": details["growth"],
                 "الربحية": details["profitability"],
@@ -344,7 +416,7 @@ def build_opportunity_rows():
 
 def opportunity_center():
     st.header("🏆 مركز الفرص الاستثمارية")
-    st.caption("يفحص الشركات الموجودة في companies.csv ويصنفها حسب النموذج الحالي.")
+    st.caption("يفحص الشركات الموجودة في companies.csv ويصنفها مع تأثير الأخبار.")
 
     if st.button("ابدأ فحص مركز الفرص"):
         df = build_opportunity_rows()
@@ -357,7 +429,7 @@ def opportunity_center():
 
         st.subheader("🏆 أفضل 10 أسهم استثمارية")
         st.dataframe(
-            df.sort_values(by="التقييم", ascending=False).head(10),
+            df.sort_values(by="التقييم النهائي", ascending=False).head(10),
             use_container_width=True
         )
 
@@ -377,14 +449,14 @@ def opportunity_center():
         st.subheader("🏷️ أفضل 10 أسهم قيمة")
         value_df = df[df["P/E"].notna()]
         value_df = value_df.sort_values(
-            by=["التقييم السعري", "التقييم"],
+            by=["التقييم السعري", "التقييم النهائي"],
             ascending=False
         )
         st.dataframe(value_df.head(10), use_container_width=True)
 
         st.subheader("⭐ قائمة أبو حمزة الذهبية")
         gold_df = df[
-            (df["التقييم"] >= 75) &
+            (df["التقييم النهائي"] >= 75) &
             (df["ROE %"].fillna(0) >= 15) &
             (df["الديون"] >= 70)
         ]
@@ -393,16 +465,16 @@ def opportunity_center():
             st.info("لا توجد شركات تحقق شروط القائمة الذهبية حالياً.")
         else:
             st.dataframe(
-                gold_df.sort_values(by="التقييم", ascending=False),
+                gold_df.sort_values(by="التقييم النهائي", ascending=False),
                 use_container_width=True
             )
 
         st.subheader("📊 أفضل سهم في كل قطاع")
         sector_best = (
-            df.sort_values(by="التقييم", ascending=False)
+            df.sort_values(by="التقييم النهائي", ascending=False)
             .groupby("القطاع")
             .head(1)
-            .sort_values(by="التقييم", ascending=False)
+            .sort_values(by="التقييم النهائي", ascending=False)
         )
 
         st.dataframe(sector_best, use_container_width=True)
