@@ -148,3 +148,51 @@ input,symbol,name_ar,name_en,sector
 4150,4150.SR,أركان,Arkan,Real Estate
 4320,4320.SR,الأندلس,Andalus,Real Estate
 4325,4325.SR,شركة أم القرى للتنمية,Umm Al Qura Development,Real Estate
+6001,6001.SR,حلواني إخوان,Halwani Bros,Consumer Defensive
+6002,6002.SR,هرفي,Herfy Food Services,Consumer Cyclical
+6003,6003.SR,نادك,NADEC,Consumer Defensive
+6005,6005.SR,سدافكو,SADAFCO,Consumer Defensive
+6006,6006.SR,الشرقية للتنمية,Eastern Development,Consumer Defensive
+6007,6007.SR,الزامل للصناعة,Zamil Industrial,Industrials
+6008,6008.SR,ساكو,SACO,Consumer Cyclical
+6009,6009.SR,العثيم,Othaim Markets,Consumer Defensive
+6010,6010.SR,نسيج,Naseej,Consumer Cyclical
+6012,6012.SR,ريدان,Raydan Restaurants,Consumer Cyclical
+6013,6013.SR,التطويرية الغذائية,Development Works Food,Consumer Defensive
+6014,6014.SR,الأمار الغذائية,Alamar Foods,Consumer Cyclical
+6015,6015.SR,أمريكانا,Americana Restaurants,Consumer Cyclical
+
+6040,6040.SR,تبوك الزراعية,Tabuk Agricultural,Consumer Defensive
+6050,6050.SR,الأسماك,Saudi Fisheries,Consumer Defensive
+6060,6060.SR,الشرقية الزراعية,Ash Sharqiyah Development,Consumer Defensive
+6070,6070.SR,الجوف الزراعية,Al Jouf Agricultural,Consumer Defensive
+6075,6075.SR,مدينة المعرفة,Knowledge Economic City,Real Estate
+6078,6078.SR,سيرا,Seera Group,Consumer Cyclical
+
+4083,4083.SR,نايس ون,Nice One,Retail
+4193,4193.SR,جرير للتسويق,Jarir Marketing,Retail
+4194,4194.SR,بن داود,BinDawood,Retail
+4195,4195.SR,أنعام القابضة,Anaam Holding,Consumer Defensive
+4196,4196.SR,فواز الحكير,Cenomi Retail,Retail
+4197,4197.SR,المتحدة للإلكترونيات,eXtra,Retail
+
+4264,4264.SR,سال للخدمات اللوجستية,SAL Logistics,Industrials
+4265,4265.SR,لومي للتأجير,Lumi Rental,Industrials
+4266,4266.SR,الخدمات البحرية,Marine Services,Industrials
+
+4326,4326.SR,روشن,Roshn Real Estate,Real Estate
+4327,4327.SR,الأندلس العقارية,Andalus Property,Real Estate
+4328,4328.SR,طيبة,Taiba Investments,Real Estate
+4329,4329.SR,العقارية,Saudi Real Estate,Real Estate
+
+5110,5110.SR,الكهرباء السعودية,Saudi Electricity,Utilities
+5111,5111.SR,أكوا باور,ACWA Power,Utilities
+5112,5112.SR,مياهنا,Miahona,Utilities
+
+7011,7011.SR,موبايلي,Mobily,Communication Services
+7012,7012.SR,الاتصالات المتكاملة,Integrated Telecom,Communication Services
+
+7205,7205.SR,إمكان,Emkan Technology,Technology
+7206,7206.SR,جاهز,Jahez,Technology
+7207,7207.SR,رسن,Rasan,Technology
+7208,7208.SR,إنتاج,Intaj Technology,Technology
