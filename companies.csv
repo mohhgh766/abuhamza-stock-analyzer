@@ -281,3 +281,37 @@ input,symbol,name_ar,name_en,sector
 9503,9503.SR,المركز الكندي الطبي,Canadian Medical Center,Healthcare
 9504,9504.SR,الخليج للتدريب,Gulf Training,Education
 9505,9505.SR,المركز الآلي السعودي,Saudi Automation,Technology
+4140,4140.SR,الصادرات السعودية,Saudi Exports,Industrials
+4141,4141.SR,العمران,Al Omran,Consumer Cyclical
+4142,4142.SR,المرابحة المرنة,Flexible Finance,Financial Services
+
+4210,4210.SR,الأبحاث والإعلام,SRMG,Communication Services
+4220,4220.SR,إعمار,Emaar The Economic City,Real Estate
+4230,4230.SR,البحر الأحمر,Red Sea International,Industrials
+4240,4240.SR,الحكير,Cenomi Centers,Real Estate
+4250,4250.SR,جبل عمر,Jabal Omar,Real Estate
+
+4300,4300.SR,دار الأركان,Dar Al Arkan,Real Estate
+4310,4310.SR,مدينة المعرفة,Knowledge Economic City,Real Estate
+4321,4321.SR,المراكز العربية,Cenomi Centers,Real Estate
+4322,4322.SR,رتال,Retal Urban Development,Real Estate
+4323,4323.SR,سمو العقارية,Sumou Real Estate,Real Estate
+4324,4324.SR,العمران العقارية,Omran Real Estate,Real Estate
+
+6004,6004.SR,التموين,Catering,Consumer Cyclical
+6011,6011.SR,برغرايززر,Burgerizzr,Consumer Cyclical
+
+7020,7020.SR,إتحاد اتصالات,Mobily,Communication Services
+7030,7030.SR,زين السعودية,Zain KSA,Communication Services
+7040,7040.SR,عذيب,GO Telecom,Communication Services
+
+8010,8010.SR,التعاونية,Tawuniya,Insurance
+8130,8130.SR,الأهلي للتكافل,AlAhli Takaful,Insurance
+8200,8200.SR,الإعادة السعودية,Saudi Re,Insurance
+8310,8310.SR,أمانة للتأمين,Amana Insurance,Insurance
+
+9510,9510.SR,نسيج العالمية,Naseej International,Consumer Cyclical
+9511,9511.SR,الوطنية للبناء,National Building,Industrials
+9512,9512.SR,الوسائل الصناعية,Industrial Means,Industrials
+9513,9513.SR,الأفق التعليمية,Education Horizon,Education
+9514,9514.SR,المهارات الرقمية,Digital Skills,Technology
