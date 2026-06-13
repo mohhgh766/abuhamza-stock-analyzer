@@ -196,3 +196,49 @@ input,symbol,name_ar,name_en,sector
 7206,7206.SR,جاهز,Jahez,Technology
 7207,7207.SR,رسن,Rasan,Technology
 7208,7208.SR,إنتاج,Intaj Technology,Technology
+1301,1301.SR,أسلاك,Saudi Steel Wire,Materials
+1302,1302.SR,بوان,Bawan,Industrials
+1303,1303.SR,الكيميائية,Saudi Chemical,Industrials
+1320,1320.SR,أنابيب السعودية,Saudi Steel Pipe,Materials
+1321,1321.SR,أنابيب الشرق,East Pipes,Materials
+1322,1322.SR,أماك,AMAK,Materials
+1323,1323.SR,التصنيع الوطنية,Tasnee,Materials
+1324,1324.SR,الخريف,Alkhorayef Water,Industrials
+
+1810,1810.SR,سيراك,SIRC,Industrials
+1820,1820.SR,الحسن غازي إبراهيم شاكر,Shaker Group,Industrials
+1830,1830.SR,البابطين,Al Babtain,Industrials
+
+2040,2040.SR,الخزف السعودي,Saudi Ceramic,Industrials
+2060,2060.SR,التصنيع الوطنية,Tasnee,Materials
+2081,2081.SR,الخريف لتقنية المياه,Alkhorayef Water,Utilities
+2082,2082.SR,أكوا باور,ACWA Power,Utilities
+
+2150,2150.SR,زجاج,Zoujaj,Materials
+2160,2160.SR,أميانتيت,Amiantit,Industrials
+2170,2170.SR,اللجين,Lujain,Materials
+2180,2180.SR,فيبكو,FIPCO,Materials
+2190,2190.SR,سيسكو القابضة,SISCO Holding,Industrials
+
+2200,2200.SR,أنابيب,Arabian Pipes,Materials
+2210,2210.SR,نماء للكيماويات,Nama Chemicals,Materials
+2220,2220.SR,معدنية,Maaden Industrial,Materials
+2230,2230.SR,الكيميائية السعودية,Saudi Chemical,Industrials
+2240,2240.SR,الزامل للصناعة,Zamil Industrial,Industrials
+
+2250,2250.SR,المجموعة السعودية,Saudi Investment Group,Materials
+2270,2270.SR,سدافكو,SADAFCO,Consumer Defensive
+2280,2280.SR,المراعي,Almarai,Consumer Defensive
+2290,2290.SR,ينساب,Yansab,Materials
+
+3007,3007.SR,زهرة الواحة,Zahrat Al Waha,Materials
+3008,3008.SR,الكثيري,Al Kathiri,Materials
+3010,3010.SR,أسمنت العربية,Arabian Cement,Materials
+3020,3020.SR,أسمنت اليمامة,Yamama Cement,Materials
+3030,3030.SR,أسمنت السعودية,Saudi Cement,Materials
+3040,3040.SR,أسمنت القصيم,Qassim Cement,Materials
+3050,3050.SR,أسمنت الجنوبية,Southern Cement,Materials
+3060,3060.SR,أسمنت ينبع,Yanbu Cement,Materials
+3070,3070.SR,أسمنت الشرقية,Eastern Cement,Materials
+3080,3080.SR,أسمنت نجران,Najran Cement,Materials
+3090,3090.SR,أسمنت تبوك,Tabuk Cement,Materials
