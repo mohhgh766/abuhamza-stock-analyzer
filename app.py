@@ -22,6 +22,7 @@ st.set_page_config(page_title="Abu Hamza Stock Analyzer", layout="wide")
 
 st.title("📊 Abu Hamza Stock Analyzer")
 st.caption("v11 - تحليل مالي + أخبار تلقائية + تأثير الأخبار على التقييم")
+st.warning("تنبيه: هذه أداة تحليل تعليمية وليست توصية شراء أو بيع. البيانات قد تتأخر أو تكون غير مكتملة.")
 
 
 @st.cache_data
@@ -217,6 +218,7 @@ def display_news_section(news):
             emoji = "🟡"
 
         st.markdown(f"{emoji} **{item['title']}**")
+
         if item.get("link"):
             st.markdown(f"[فتح الخبر]({item['link']})")
 
@@ -250,11 +252,7 @@ def display_analysis(user_input):
 
     base_score, good, warn = score_stock(data)
 
-    news = get_all_news(
-        data["symbol"],
-        data["name_ar"]
-    )
-
+    news = get_all_news(data["symbol"], data["name_ar"])
     news_rating, news_status = news_score(news)
 
     final_score = adjusted_score(base_score, news_rating)
@@ -428,30 +426,18 @@ def opportunity_center():
         st.divider()
 
         st.subheader("🏆 أفضل 10 أسهم استثمارية")
-        st.dataframe(
-            df.sort_values(by="التقييم النهائي", ascending=False).head(10),
-            use_container_width=True
-        )
+        st.dataframe(df.sort_values(by="التقييم النهائي", ascending=False).head(10), use_container_width=True)
 
         st.subheader("🚀 أفضل 10 أسهم نمو")
-        st.dataframe(
-            df.sort_values(by="النمو", ascending=False).head(10),
-            use_container_width=True
-        )
+        st.dataframe(df.sort_values(by="النمو", ascending=False).head(10), use_container_width=True)
 
         st.subheader("💰 أفضل 10 أسهم توزيعات")
         div_df = df[df["Dividend Yield %"].notna()]
-        st.dataframe(
-            div_df.sort_values(by="Dividend Yield %", ascending=False).head(10),
-            use_container_width=True
-        )
+        st.dataframe(div_df.sort_values(by="Dividend Yield %", ascending=False).head(10), use_container_width=True)
 
         st.subheader("🏷️ أفضل 10 أسهم قيمة")
         value_df = df[df["P/E"].notna()]
-        value_df = value_df.sort_values(
-            by=["التقييم السعري", "التقييم النهائي"],
-            ascending=False
-        )
+        value_df = value_df.sort_values(by=["التقييم السعري", "التقييم النهائي"], ascending=False)
         st.dataframe(value_df.head(10), use_container_width=True)
 
         st.subheader("⭐ قائمة أبو حمزة الذهبية")
@@ -464,10 +450,7 @@ def opportunity_center():
         if gold_df.empty:
             st.info("لا توجد شركات تحقق شروط القائمة الذهبية حالياً.")
         else:
-            st.dataframe(
-                gold_df.sort_values(by="التقييم النهائي", ascending=False),
-                use_container_width=True
-            )
+            st.dataframe(gold_df.sort_values(by="التقييم النهائي", ascending=False), use_container_width=True)
 
         st.subheader("📊 أفضل سهم في كل قطاع")
         sector_best = (
