@@ -1,26 +1,21 @@
 import feedparser
 import urllib.parse
 
-
 POSITIVE_WORDS = [
-    "عقد", "توزيع", "أرباح", "نمو", "ارتفاع", "توصية", "توسع",
-    "استحواذ", "مشروع", "زيادة", "تحسن", "توقيع", "ترسية",
-    "توزيعات", "صافي ربح", "قفزة", "record", "growth",
-    "profit", "beat", "upgrade", "contract", "dividend", "expansion",
-    "acquisition", "revenue", "earnings"
+    "عقد", "توزيع", "أرباح", "نمو", "ارتفاع", "توسع", "استحواذ",
+    "مشروع", "زيادة", "تحسن", "توقيع", "ترسية", "صافي ربح",
+    "dividend", "profit", "growth", "contract", "beat", "upgrade"
 ]
 
 NEGATIVE_WORDS = [
     "خسائر", "تراجع", "انخفاض", "غرامة", "تحقيق", "دعوى",
-    "هبوط", "إيقاف", "مخالفة", "خفض", "انكماش", "تراجع الأرباح",
-    "loss", "decline", "miss", "downgrade", "lawsuit", "fine",
-    "investigation", "drop", "weak"
+    "هبوط", "إيقاف", "مخالفة", "خفض",
+    "loss", "decline", "miss", "downgrade", "lawsuit", "fine"
 ]
 
 
 def analyze_sentiment(text):
     text = str(text).lower()
-
     positive = sum(1 for word in POSITIVE_WORDS if word.lower() in text)
     negative = sum(1 for word in NEGATIVE_WORDS if word.lower() in text)
 
@@ -28,29 +23,51 @@ def analyze_sentiment(text):
         return "إيجابي"
     elif negative > positive:
         return "سلبي"
-    else:
-        return "محايد"
+    return "محايد"
 
 
-def get_google_news(query, limit=5):
+def is_relevant(title, company_name, symbol):
+    title = str(title).lower()
+    company_name = str(company_name).lower()
+    clean_symbol = str(symbol).replace(".SR", "").lower() if symbol else ""
+
+    keywords = [
+        company_name,
+        clean_symbol,
+        "تداول",
+        "أرقام"
+    ]
+
+    return (
+        company_name in title
+        or clean_symbol in title
+    )
+
+
+def get_google_news(query, company_name, symbol=None, limit=5):
     try:
         encoded_query = urllib.parse.quote(query)
         url = f"https://news.google.com/rss/search?q={encoded_query}&hl=ar&gl=SA&ceid=SA:ar"
-
         feed = feedparser.parse(url)
+
         news = []
 
-        for entry in feed.entries[:limit]:
+        for entry in feed.entries:
             title = entry.get("title", "")
             link = entry.get("link", "")
-            sentiment = analyze_sentiment(title)
+
+            if not is_relevant(title, company_name, symbol):
+                continue
 
             news.append({
                 "source": "Google News",
                 "title": title,
                 "link": link,
-                "sentiment": sentiment
+                "sentiment": analyze_sentiment(title)
             })
+
+            if len(news) >= limit:
+                break
 
         return news
 
@@ -58,25 +75,26 @@ def get_google_news(query, limit=5):
         return []
 
 
-def get_yahoo_news(symbol, limit=5):
+def get_yahoo_news(symbol, company_name, limit=3):
     try:
-        clean_symbol = str(symbol).replace(".SR", "")
-        url = f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={clean_symbol}&region=US&lang=en-US"
-
+        url = f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={symbol}&region=US&lang=en-US"
         feed = feedparser.parse(url)
+
         news = []
 
-        for entry in feed.entries[:limit]:
+        for entry in feed.entries:
             title = entry.get("title", "")
             link = entry.get("link", "")
-            sentiment = analyze_sentiment(title)
 
             news.append({
                 "source": "Yahoo Finance",
                 "title": title,
                 "link": link,
-                "sentiment": sentiment
+                "sentiment": analyze_sentiment(title)
             })
+
+            if len(news) >= limit:
+                break
 
         return news
 
@@ -84,91 +102,58 @@ def get_yahoo_news(symbol, limit=5):
         return []
 
 
-def get_argaam_news(company_name, symbol=None, limit=5):
-    queries = []
+def get_saudi_news(company_name, symbol=None, limit=6):
+    clean_symbol = str(symbol).replace(".SR", "") if symbol else ""
 
-    if company_name:
-        queries.append(f"{company_name} أرقام")
-        queries.append(f"{company_name} site:argaam.com")
-        queries.append(f"{company_name} نتائج")
-        queries.append(f"{company_name} أرباح")
+    queries = [
+        f'"{company_name}" site:argaam.com',
+        f'"{company_name}" site:saudiexchange.sa',
+        f'"{company_name}" "تداول السعودية"',
+        f'"{company_name}" "أرقام"',
+    ]
 
-    if symbol:
-        clean_symbol = str(symbol).replace(".SR", "")
-        queries.append(f"{clean_symbol} أرقام")
-        queries.append(f"{clean_symbol} site:argaam.com")
-        queries.append(f"{clean_symbol} نتائج")
-
-    all_news = []
-
-    for q in queries:
-        all_news.extend(get_google_news(q, limit=2))
-
-    return deduplicate_news(all_news, limit)
-
-
-def get_tadawul_news(company_name, symbol=None, limit=5):
-    queries = []
-
-    if company_name:
-        queries.append(f"{company_name} تداول السعودية")
-        queries.append(f"{company_name} إعلان تداول")
-        queries.append(f"{company_name} توزيعات تداول")
-
-    if symbol:
-        clean_symbol = str(symbol).replace(".SR", "")
-        queries.append(f"{clean_symbol} تداول السعودية")
-        queries.append(f"{clean_symbol} إعلان تداول")
+    if clean_symbol:
+        queries.extend([
+            f'"{clean_symbol}" site:argaam.com',
+            f'"{clean_symbol}" site:saudiexchange.sa'
+        ])
 
     all_news = []
 
     for q in queries:
-        all_news.extend(get_google_news(q, limit=2))
+        all_news.extend(get_google_news(q, company_name, symbol, limit=2))
 
     return deduplicate_news(all_news, limit)
-
-
-def get_saudi_news(company_name, symbol=None, limit=8):
-    news = []
-
-    news.extend(get_argaam_news(company_name, symbol, limit=4))
-    news.extend(get_tadawul_news(company_name, symbol, limit=4))
-
-    if company_name:
-        news.extend(get_google_news(f"{company_name} السوق السعودي", limit=2))
-
-    return deduplicate_news(news, limit)
 
 
 def deduplicate_news(news, limit=8):
     seen = set()
-    clean_news = []
+    clean = []
 
     for item in news:
         title = item.get("title", "").strip()
 
-        if not title:
+        if not title or title in seen:
             continue
 
-        if title in seen:
-            continue
-
-        clean_news.append(item)
+        clean.append(item)
         seen.add(title)
 
-        if len(clean_news) >= limit:
+        if len(clean) >= limit:
             break
 
-    return clean_news
+    return clean
 
 
 def get_all_news(symbol, company_name, limit=8):
     news = []
 
-    if symbol:
-        news.extend(get_yahoo_news(symbol, limit=3))
+    is_saudi = str(symbol).endswith(".SR")
 
-    news.extend(get_saudi_news(company_name, symbol, limit=6))
+    if is_saudi:
+        news.extend(get_saudi_news(company_name, symbol, limit=limit))
+    else:
+        news.extend(get_yahoo_news(symbol, company_name, limit=limit))
 
     return deduplicate_news(news, limit)
 
