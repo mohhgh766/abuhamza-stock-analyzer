@@ -1,18 +1,57 @@
-input,symbol,name_ar,name_en,sector
-4031,4031.SR,الخدمات الأرضية,Saudi Ground Services,النقل
-الخدمات الأرضية,4031.SR,الخدمات الأرضية,Saudi Ground Services,النقل
-SGS,4031.SR,الخدمات الأرضية,Saudi Ground Services,النقل
-7203,7203.SR,علم,Elm Company,التقنية
-علم,7203.SR,علم,Elm Company,التقنية
-4002,4002.SR,المواساة,Mouwasat,الرعاية الصحية
-المواساة,4002.SR,المواساة,Mouwasat,الرعاية الصحية
-4190,4190.SR,جرير,Jarir,التجزئة
-جرير,4190.SR,جرير,Jarir,التجزئة
-AAPL,AAPL,أبل,Apple,Technology
-Apple,AAPL,أبل,Apple,Technology
-MSFT,MSFT,مايكروسوفت,Microsoft,Technology
-Microsoft,MSFT,مايكروسوفت,Microsoft,Technology
-4050,4050.SR,سال,SAL,النقل
-4030,4030.SR,البحري,Bahri,النقل
-4260,4260.SR,بدجت,Budget Saudi,النقل
-4261,4261.SR,ذيب,Theeb Rent A Car,النقل
+2222,2222.SR,أرامكو,Saudi Aramco,Energy
+1211,1211.SR,معادن,Maaden,Basic Materials
+2010,2010.SR,سابك,SABIC,Basic Materials
+2290,2290.SR,ينساب,Yansab,Basic Materials
+2310,2310.SR,سبكيم,Sipchem,Basic Materials
+2350,2350.SR,كيان,Kayan,Basic Materials
+2330,2330.SR,المتقدمة,Advanced Petrochemical,Basic Materials
+2210,2210.SR,نماء,Nama Chemicals,Basic Materials
+2170,2170.SR,اللجين,Lujain,Basic Materials
+2060,2060.SR,التصنيع,Tasnee,Basic Materials
+
+1120,1120.SR,الراجحي,Al Rajhi Bank,Banks
+1180,1180.SR,الأهلي,SNB,Banks
+1150,1150.SR,الإنماء,Alinma Bank,Banks
+1140,1140.SR,البلاد,Bank Albilad,Banks
+1050,1050.SR,السعودي الأول,SAB,Banks
+1080,1080.SR,العربي,ANB,Banks
+1010,1010.SR,الرياض,Riyad Bank,Banks
+1020,1020.SR,الجزيرة,Bank Aljazira,Banks
+1030,1030.SR,الاستثمار,SAIB,Banks
+1060,1060.SR,الأول السعودي,SAB,Banks
+
+4001,4001.SR,دله الصحية,Dallah Health,Healthcare
+4002,4002.SR,المواساة,Mouwasat,Healthcare
+4004,4004.SR,رعاية,Care,Healthcare
+4013,4013.SR,سليمان الحبيب,Al Habib,Healthcare
+4007,4007.SR,الحمادي,Hammadi,Healthcare
+4164,4164.SR,النهدي,Nahdi,Healthcare
+4015,4015.SR,جمجوم فارما,Jamjoom Pharma,Healthcare
+
+7010,7010.SR,اس تي سي,STC,Communication Services
+7020,7020.SR,عذيب,GO Telecom,Communication Services
+7030,7030.SR,زين,Zain KSA,Communication Services
+7203,7203.SR,علم,Elm,Technology
+7202,7202.SR,حلول,Solutions,Technology
+7204,7204.SR,توبي,Tوبي,Technology
+
+4030,4030.SR,البحري,Bahri,Industrials
+4031,4031.SR,الخدمات الأرضية,SGS,Industrials
+4050,4050.SR,سال,SAL,Industrials
+4260,4260.SR,بدجت,Budget Saudi,Industrials
+4261,4261.SR,ذيب,Theeb,Industrials
+4263,4263.SR,سالك,SALIC,Industrials
+6004,6004.SR,التموين,Catering,Industrials
+
+4190,4190.SR,جرير,Jarir,Retail
+2280,2280.SR,المراعي,Almarai,Consumer Defensive
+1810,1810.SR,سيرا,Seera,Consumer Cyclical
+1834,1834.SR,الموارد,Resources,Industrials
+4321,4321.SR,سينومي ريتيل,Cenomi Retail,Retail
+4322,4322.SR,سينومي سنترز,Cenomi Centers,Real Estate
+1111,1111.SR,مجموعة تداول,Tadawul Group,Financial Services
+2082,2082.SR,أكوا باور,ACWA Power,Utilities
+8010,8010.SR,الجزيرة ريت,Aljazira REIT,Real Estate
+8230,8230.SR,تكافل الراجحي,Al Rajhi Takaful,Insurance
+8200,8200.SR,إعادة,Saudi Re,Insurance
+1182,1182.SR,أملاك,Amlak,Financial Services
