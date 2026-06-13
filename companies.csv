@@ -242,3 +242,42 @@ input,symbol,name_ar,name_en,sector
 3070,3070.SR,أسمنت الشرقية,Eastern Cement,Materials
 3080,3080.SR,أسمنت نجران,Najran Cement,Materials
 3090,3090.SR,أسمنت تبوك,Tabuk Cement,Materials
+4001,4001.SR,أسواق المزرعة,Farm Superstores,Consumer Defensive
+4002,4002.SR,المواساة,Mouwasat Medical Services,Healthcare
+4003,4003.SR,إكسترا,United Electronics,Retail
+4004,4004.SR,دله الصحية,Dallah Healthcare,Healthcare
+4005,4005.SR,رعاية,National Medical Care,Healthcare
+4006,4006.SR,أسمنت المنطقة الشمالية,Northern Cement,Materials
+
+4011,4011.SR,لازوردي,Lazurde,Consumer Cyclical
+4012,4012.SR,الأصيل,Alaseel,Consumer Cyclical
+4013,4013.SR,دور,Dur Hospitality,Consumer Cyclical
+4014,4014.SR,الخطوط السعودية للتموين,Catering,Consumer Cyclical
+4015,4015.SR,جمجوم فارما,Jamjoom Pharma,Healthcare
+4016,4016.SR,النهدي الطبية,Nahdi Medical,Healthcare
+
+4050,4050.SR,ساسكو,SASCO,Consumer Cyclical
+4051,4051.SR,باعظيم,Baazeem,Consumer Defensive
+4052,4052.SR,العقارية السعودية,Saudi Real Estate,Real Estate
+
+4160,4160.SR,ثمار,Thimar,Consumer Defensive
+4161,4161.SR,بنان,Banan Real Estate,Real Estate
+4162,4162.SR,المطاحن الأولى,First Mills,Consumer Defensive
+4163,4163.SR,المطاحن الحديثة,Modern Mills,Consumer Defensive
+4164,4164.SR,المطاحن العربية,Arabian Mills,Consumer Defensive
+
+4260,4260.SR,بدجت السعودية,Budget Saudi,Industrials
+4261,4261.SR,ذيب,Theeb Rent A Car,Industrials
+4262,4262.SR,أبو معطي,Abu Moati,Retail
+4263,4263.SR,سلوشنز,Solutions by STC,Technology
+
+4290,4290.SR,الخدمات الأرضية,Saudi Ground Services,Industrials
+4291,4291.SR,الوطنية للتعليم,National Company for Learning,Education
+4292,4292.SR,عطاء التعليمية,Ataa Educational,Education
+4293,4293.SR,المعرفة,Knowledge Education,Education
+
+9501,9501.SR,الإنماء طوكيو مارين,Alinma Tokio Marine,Insurance
+9502,9502.SR,الوطنية للبناء والتسويق,NBM,Industrials
+9503,9503.SR,المركز الكندي الطبي,Canadian Medical Center,Healthcare
+9504,9504.SR,الخليج للتدريب,Gulf Training,Education
+9505,9505.SR,المركز الآلي السعودي,Saudi Automation,Technology
