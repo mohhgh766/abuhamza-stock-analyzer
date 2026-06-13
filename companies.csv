@@ -56,3 +56,56 @@ input,symbol,name_ar,name_en,sector
 8230,8230.SR,تكافل الراجحي,Al Rajhi Takaful,Insurance
 8200,8200.SR,إعادة,Saudi Re,Insurance
 1182,1182.SR,أملاك,Amlak,Financial Services
+1301,1301.SR,أسلاك,Aslak,Industrials
+1302,1302.SR,بوان,Bawan,Industrials
+1320,1320.SR,أنابيب السعودية,Saudi Steel Pipe,Industrials
+1321,1321.SR,أنابيب الشرق,East Pipes,Industrials
+1322,1322.SR,أماك,AMAK,Basic Materials
+2040,2040.SR,الخزف السعودي,Saudi Ceramics,Industrials
+2050,2050.SR,صافولا,Savola,Consumer Defensive
+2070,2070.SR,الدوائية,SPIMACO,Healthcare
+2080,2080.SR,الغاز,Gasco,Utilities
+2081,2081.SR,الخريف,Alkhorayef Water,Utilities
+2083,2083.SR,مياهنا,Miahona,Utilities
+2120,2120.SR,المتطورة,SADIG,Financial Services
+2130,2130.SR,صدق,SADAFCO?,Industrials
+2140,2140.SR,الأحساء,Ash-Sharqiyah,Industrials
+2150,2150.SR,زجاج,Zoujaj,Industrials
+2160,2160.SR,أميانتيت,Amiantit,Industrials
+2180,2180.SR,فيبكو,FIPCO,Basic Materials
+2190,2190.SR,سيسكو,SISCO,Industrials
+2200,2200.SR,أنابيب,Arabian Pipes,Industrials
+2223,2223.SR,لوبريف,Luberef,Energy
+2230,2230.SR,الكيميائية,Saudi Chemical,Healthcare
+2250,2250.SR,المجموعة السعودية,SIIG,Basic Materials
+2270,2270.SR,سدافكو,SADAFCO,Consumer Defensive
+2281,2281.SR,تنمية,Tanmiah,Consumer Defensive
+2282,2282.SR,نقي,Naqi Water,Consumer Defensive
+2283,2283.SR,المطاحن الأولى,First Mills,Consumer Defensive
+2284,2284.SR,المطاحن الحديثة,Modern Mills,Consumer Defensive
+2285,2285.SR,المطاحن العربية,Arabian Mills,Consumer Defensive
+2300,2300.SR,صناعة الورق,Saudi Paper,Basic Materials
+2320,2320.SR,البابطين,Al Babtain,Industrials
+2340,2340.SR,العبداللطيف,Al Abdullatif,Consumer Cyclical
+2360,2360.SR,الفخارية,Saudi Vitrified Clay Pipe,Industrials
+2370,2370.SR,مسك,MESC,Industrials
+2380,2380.SR,بترو رابغ,Petro Rabigh,Energy
+2381,2381.SR,الحفر العربية,Arabian Drilling,Energy
+2382,2382.SR,أديس,ADES,Energy
+3001,3001.SR,أسمنت حائل,Hail Cement,Basic Materials
+3002,3002.SR,أسمنت نجران,Najran Cement,Basic Materials
+3003,3003.SR,أسمنت المدينة,City Cement,Basic Materials
+3004,3004.SR,أسمنت الشمالية,Northern Cement,Basic Materials
+3005,3005.SR,أسمنت أم القرى,Umm Al-Qura Cement,Basic Materials
+3007,3007.SR,زهرة الواحة,Zahrat Al Waha,Basic Materials
+3008,3008.SR,الكثيري,Al Kathiri,Basic Materials
+3010,3010.SR,أسمنت العربية,Arabian Cement,Basic Materials
+3020,3020.SR,أسمنت اليمامة,Yamama Cement,Basic Materials
+3030,3030.SR,أسمنت السعودية,Saudi Cement,Basic Materials
+3040,3040.SR,أسمنت القصيم,Qassim Cement,Basic Materials
+3050,3050.SR,أسمنت الجنوبية,Southern Cement,Basic Materials
+3060,3060.SR,أسمنت ينبع,Yanbu Cement,Basic Materials
+3080,3080.SR,أسمنت الشرقية,Eastern Cement,Basic Materials
+3090,3090.SR,أسمنت تبوك,Tabuk Cement,Basic Materials
+3091,3091.SR,أسمنت الجوف,Jouf Cement,Basic Materials
+3092,3092.SR,أسمنت الرياض,Riyadh Cement,Basic Materials
