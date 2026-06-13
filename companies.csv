@@ -109,3 +109,42 @@ input,symbol,name_ar,name_en,sector
 3090,3090.SR,أسمنت تبوك,Tabuk Cement,Basic Materials
 3091,3091.SR,أسمنت الجوف,Jouf Cement,Basic Materials
 3092,3092.SR,أسمنت الرياض,Riyadh Cement,Basic Materials
+1040,1040.SR,البنك السعودي الفرنسي,BSF,Banks
+1090,1090.SR,الخليج الدولي,GIB,Banks
+
+8012,8012.SR,الجزيرة موطن ريت,Jadwa REIT Saudi,Real Estate
+4330,4330.SR,الرياض ريت,Riyadh REIT,Real Estate
+4331,4331.SR,الجزيرة ريت,Aljazira REIT,Real Estate
+4332,4332.SR,جدوى ريت السعودية,Jadwa REIT,Real Estate
+4333,4333.SR,تعليم ريت,Taleem REIT,Real Estate
+4334,4334.SR,المعذر ريت,Al Maather REIT,Real Estate
+4335,4335.SR,مشاركة ريت,Musharaka REIT,Real Estate
+4336,4336.SR,ملكية ريت,Mulkia REIT,Real Estate
+4337,4337.SR,سدكو كابيتال ريت,Sedco REIT,Real Estate
+4338,4338.SR,الأهلي ريت 1,AlAhli REIT,Real Estate
+4339,4339.SR,دراية ريت,Derayah REIT,Real Estate
+
+8011,8011.SR,متلايف للتأمين,MetLife AIG ANB,Insurance
+8020,8020.SR,ملاذ للتأمين,Malath Insurance,Insurance
+8030,8030.SR,ميدغلف,MEDGULF,Insurance
+8040,8040.SR,أليانز السعودي الفرنسي,Allianz SF,Insurance
+8050,8050.SR,سلامة,Salama,Insurance
+8060,8060.SR,ولاء,Walaa Insurance,Insurance
+8070,8070.SR,الدرع العربي,Arabian Shield,Insurance
+8100,8100.SR,سايكو,SAICO,Insurance
+8120,8120.SR,إتحاد الخليج الأهلية,Gulf Union Alahlia,Insurance
+8150,8150.SR,أسيج,ACIG,Insurance
+8160,8160.SR,التعاونية,Tawuniya,Insurance
+8170,8170.SR,الاتحاد للتأمين,Al Etihad Insurance,Insurance
+8180,8180.SR,الصقر للتأمين,Al Sagr Insurance,Insurance
+8190,8190.SR,المتحدة للتأمين,United Insurance,Insurance
+8240,8240.SR,تكافل العربية,Arabia Insurance,Insurance
+8250,8250.SR,جي آي جي,GIG Saudi,Insurance
+8260,8260.SR,الخليجية العامة,Gulf General,Insurance
+8270,8270.SR,بوبا العربية,Bupa Arabia,Insurance
+8280,8280.SR,لانا,Lana Medical,Insurance
+8300,8300.SR,الوطنية,National Insurance,Insurance
+
+4150,4150.SR,أركان,Arkan,Real Estate
+4320,4320.SR,الأندلس,Andalus,Real Estate
+4325,4325.SR,شركة أم القرى للتنمية,Umm Al Qura Development,Real Estate
